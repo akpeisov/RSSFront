@@ -1,0 +1,63 @@
+.input-edit {
+  max-width: 600px;
+  margin: auto;
+  font-family: Arial, sans-serif;
+
+  h2 {
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    margin: 10px 0;
+  }
+
+  .event-card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+
+    h4 {
+      margin-top: 0;
+    }
+
+    .action-card {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+
+      label {
+        margin-right: 10px;
+      }
+
+      .btn-remove {
+        margin-left: 10px;
+        background-color: #ff5c5c;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        padding: 5px 10px;
+        cursor: pointer;
+
+        &:hover {
+          background-color: #e04444;
+        }
+      }
+    }
+
+    .btn-add {
+      margin-top: 10px;
+      background-color: #5cb85c;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 5px 10px;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #4cae4c;
+      }
+    }
+  }
+}

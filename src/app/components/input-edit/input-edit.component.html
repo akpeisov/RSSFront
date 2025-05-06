@@ -1,0 +1,60 @@
+<div class="input-edit">
+  <button (click)="back()"><-</button>
+  <h2>Редактирование входа</h2>
+  <label>
+    Имя входа
+    <input type="text" [(ngModel)]="input.name" />
+  </label>
+  <label>
+    Тип входа
+    <select id="type" [(ngModel)]="input.type" class="form-control" (change)="updateEvents()">
+      <option value="BTN">Кнопка</option>
+      <option value="SW">Выключатель</option>
+      <option value="INVSW">Переключатель</option>
+    </select>
+  </label>
+
+  <h3>События</h3>
+
+  <div *ngFor="let event of input.events; let i = index">
+    <div class="event-card">
+      <h4>Event {{ event.event }}</h4>
+      <div *ngFor="let action of event.actions; let j = index">
+        <div class="action-card">
+          <label>Выход:</label>
+          <select [(ngModel)]="action.outputID"
+                  (ngModelChange)="onOutputChange(action)">
+            <option *ngFor="let output of outputs"
+                    [ngValue]="output.outputID">
+              {{ output.name }}
+            </option>
+          </select>
+
+          <label>Действие:</label>
+          <select [(ngModel)]="action.action">
+            <option value="on">Вкл</option>
+            <option value="off">Выкл</option>
+            <option value="toggle">Переключить</option>
+          </select>
+
+          <div *ngIf="action.action == 'on'">
+            <label>Длительность (сек):</label>
+            <input type="number" [(ngModel)]="action.duration" />
+          </div>
+          <button class="btn-remove" (click)="removeAction(i, j)">-</button>
+        </div>
+      </div>
+      <button class="btn-add" (click)="addAction(i)">+</button>
+    </div>
+  </div>
+
+
+<!--  <button (click)="addEvent()">+</button>-->
+<!--  <div *ngFor="let event of input.events">-->
+<!--    <h4>{{ event.event }}</h4>-->
+<!--      <div *ngFor="let action of event.actions">-->
+<!--        <h4>{{ action.output }} {{ action.action }}</h4>-->
+<!--      </div>-->
+<!--  </div>-->
+  <button (click)="save()">Сохранить</button>
+</div>
