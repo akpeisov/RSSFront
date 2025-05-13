@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import {FormsModule} from "@angular/forms";
 import {debounceTime, Subject} from "rxjs";
 import {WebsocketService} from "../../services/websocket.service";
+import {NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-output-card',
@@ -9,7 +10,8 @@ import {WebsocketService} from "../../services/websocket.service";
   styleUrls: ['./output-card.component.scss'],
   standalone: true,
   imports: [
-    FormsModule
+    FormsModule,
+    NgIf
   ]
 })
 export class OutputCardComponent {
