@@ -154,20 +154,34 @@ export class AppComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    console.log('App Component initializing...');
+    
     if (await this.keycloakService.isLoggedIn()) {
+      console.log('User is logged in');
       const userProfile = await this.keycloakService.loadUserProfile();
       this.username = userProfile.username;
+      
+      // Connect websocket after confirming login
+      console.log('Initializing WebSocket connection...');
+      this.websocketService.connect();
+      
+      this.websocketService.messages$.subscribe(
+        msg => {
+          console.log('WebSocket message received:', msg);
+          this.wsMgs = msg;
+          this.dataService.updateData(msg);
+        },
+        error => {
+          console.error('WebSocket error:', error);
+          this.toastr.error('WebSocket connection error');
+        },
+        () => {
+          console.log('WebSocket connection completed/closed');
+        }
+      );
+    } else {
+      console.log('User is not logged in');
     }
-
-    this.websocketService.messages$.subscribe(
-      msg => {
-        this.wsMgs = msg;
-        this.dataService.updateData(msg);
-      },
-      error => {
-        this.toastr.error('WebSocket connection error');
-      }
-    );
 
     // Handle navigation events
     this.router.events.pipe(
