@@ -12,6 +12,7 @@ import { PageTransitionComponent } from './components/shared/page-transition/pag
 import { AnimationService } from './services/animation.service';
 import { IWSMsg } from "./model/ws-mgs";
 import { Location } from '@angular/common';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -30,6 +31,7 @@ import { Location } from '@angular/common';
         <div class="app-header">
           <div class="header-left">
             <a routerLink="/" class="app-title">RSS Front</a>
+            <div *ngIf="environment.test" class="test-indicator">TEST</div>
           </div>
           <div class="header-right">
             <app-theme-toggle></app-theme-toggle>
@@ -43,12 +45,28 @@ import { Location } from '@angular/common';
       </div>
     </app-page-transition>
   `,
-  styleUrls: ['./app.component.scss']
+  styles: [`
+    .test-indicator {
+      background-color: #ff4444;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+  `]
 })
 export class AppComponent implements OnInit {
   title = 'RSSFront';
   wsMgs: IWSMsg | undefined;
   username: string | undefined;
+  environment = environment;
   private previousUrl: string = '';
 
   constructor(
