@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {Observable, of} from "rxjs";
+import {Observable, of, BehaviorSubject} from "rxjs";
 import {IUpdateOutputMsg} from "../model/update-output-msg";
 import {map, tap} from "rxjs/operators";
+import { IWSMsg } from '../model/ws-mgs';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +11,8 @@ import {map, tap} from "rxjs/operators";
 export class DataService {
   private controllers: any[] = [];
   private apiUrl = 'https://api.akpeisov.kz/webapi/userDevices';
+  private dataSubject = new BehaviorSubject<IWSMsg | null>(null);
+  data$ = this.dataSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -122,7 +125,9 @@ export class DataService {
     return null;
   }
 
-
+  updateData(data: IWSMsg) {
+    this.dataSubject.next(data);
+  }
 }
 
 

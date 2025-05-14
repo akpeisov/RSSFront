@@ -5,6 +5,8 @@ import {DataService} from "../../services/data.service";
 import {NgForOf, NgIf} from "@angular/common";
 import {debounceTime, Subject} from "rxjs";
 import {WebsocketService} from "../../services/websocket.service";
+import { Location } from '@angular/common';
+import { AnimationService } from '../../services/animation.service';
 
 @Component({
   selector: 'app-input-edit',
@@ -21,11 +23,18 @@ import {WebsocketService} from "../../services/websocket.service";
 export class InputEditComponent implements OnInit {
   input: any;
   outputs: any[] = [];
+  controllerMac: string | null = null;
 
-  private toggleSubject= new Subject<{ payload:any }>();
+  private toggleSubject = new Subject<{ payload:any }>();
 
-  constructor(private router: Router, private route: ActivatedRoute, private dataService: DataService,
-              private websocketService: WebsocketService) {
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private dataService: DataService,
+    private websocketService: WebsocketService,
+    private location: Location,
+    private animationService: AnimationService
+  ) {
     this.toggleSubject.pipe(debounceTime(300)).subscribe(({ payload }) => {
       this.websocketService.sendMessage({
         type: 'UPDATEINPUT',
@@ -36,16 +45,16 @@ export class InputEditComponent implements OnInit {
 
   ngOnInit(): void {
     const uuid = this.route.snapshot.paramMap.get('uuid');
-    console.log('uuid', uuid)
     if (uuid) {
       this.dataService.getInputByUuid(uuid).subscribe((input) => {
         this.input = input;
-        console.log('input-edit', this.input)
+        this.controllerMac = input.mac;
+        console.log('input-edit', this.input);
       });
 
       this.dataService.getOutputsByInputUuid(uuid).subscribe((outputs) => {
         this.outputs = outputs;
-        console.log('outputs', this.outputs)
+        console.log('outputs', this.outputs);
       });
     }
   }
@@ -102,14 +111,26 @@ export class InputEditComponent implements OnInit {
   }
 
   save(): void {
-    console.log('Сохранение данных:', this.input);
-    // Сохранение данных через сервис
-    //this.input.mac = this.mac
-    this.toggleSubject.next( {payload: this.input });
-    //this.router.navigate(['/controller-details']); // Возврат на предыдущую страницу
+    console.log('Saving data:', this.input);
+    this.toggleSubject.next({ payload: this.input });
+    this.animationService.triggerLeaveAnimation();
+    setTimeout(() => {
+      if (this.controllerMac) {
+        this.router.navigate(['/controller', this.controllerMac]);
+      } else {
+        this.location.back();
+      }
+    }, 150); // Half the animation duration for smoother transition
   }
 
   back(): void {
-    this.router.navigate(['/controller-details']); // Возврат на предыдущую страницу
+    this.animationService.triggerLeaveAnimation();
+    setTimeout(() => {
+      if (this.controllerMac) {
+        this.router.navigate(['/controller', this.controllerMac]);
+      } else {
+        this.location.back();
+      }
+    }, 150); // Half the animation duration for smoother transition
   }
 }

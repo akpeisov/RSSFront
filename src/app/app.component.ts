@@ -1,144 +1,114 @@
-import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink } from '@angular/router';
-import {WebsocketService} from "./services/websocket.service";
-import {KeycloakService} from "keycloak-angular";
-import {OutputCardComponent} from "./components/output-card/output-card.component";
-import {HttpClientModule} from "@angular/common/http";
-import {IWSMsg} from "./model/ws-mgs";
-import {DataService} from "./services/data.service";
-import {ToastrService} from "ngx-toastr";
-import {take} from "rxjs";
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterOutlet, Router, NavigationEnd, RouterModule } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { WebsocketService } from "./services/websocket.service";
+import { KeycloakService } from "keycloak-angular";
+import { DataService } from "./services/data.service";
+import { ToastrService } from "ngx-toastr";
 import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.component';
 import { IconComponent } from './components/shared/icon/icon.component';
+import { PageTransitionComponent } from './components/shared/page-transition/page-transition.component';
+import { AnimationService } from './services/animation.service';
+import { IWSMsg } from "./model/ws-mgs";
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    RouterOutlet,
-    RouterLink,
-    OutputCardComponent,
-    HttpClientModule,
     CommonModule,
+    RouterOutlet,
+    RouterModule,
     ThemeToggleComponent,
-    IconComponent
+    IconComponent,
+    PageTransitionComponent
   ],
   template: `
-    <div class="app-container">
-      <div class="app-header">
-        <a routerLink="/" class="home-link">
-          <h1>RSS Front</h1>
-        </a>
-        <div class="header-right">
-          <div class="user-info" *ngIf="username">
-            <button class="profile-button" (click)="openKeycloakProfile()">
+    <app-page-transition>
+      <div class="app-container">
+        <div class="app-header">
+          <div class="header-left">
+            <a routerLink="/" class="app-title">RSS Front</a>
+          </div>
+          <div class="header-right">
+            <app-theme-toggle></app-theme-toggle>
+            <div class="user-info" (click)="navigateToAccount()">
               <app-icon name="user"></app-icon>
               <span class="username">{{ username }}</span>
-            </button>
-            <button class="logout-button" (click)="logout()" title="Logout">
-              <app-icon name="logout"></app-icon>
-            </button>
+            </div>
           </div>
-          <app-theme-toggle></app-theme-toggle>
         </div>
+        <router-outlet></router-outlet>
       </div>
-      <router-outlet></router-outlet>
-    </div>
+    </app-page-transition>
   `,
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'RSSFront';
-  wsMgs : IWSMsg | undefined;
+  wsMgs: IWSMsg | undefined;
   username: string | undefined;
+  private previousUrl: string = '';
 
-  constructor(private websocketService: WebsocketService,
-              private keycloakService: KeycloakService,
-              private dataService: DataService,
-              private toastr: ToastrService) {}
+  constructor(
+    private websocketService: WebsocketService,
+    private keycloakService: KeycloakService,
+    private dataService: DataService,
+    private toastr: ToastrService,
+    private router: Router,
+    private location: Location,
+    private animationService: AnimationService
+  ) {
+    // Handle back button
+    this.location.subscribe(() => {
+      this.animationService.triggerLeaveAnimation();
+      setTimeout(() => {
+        this.animationService.triggerEnterAnimation();
+      }, 300); // Match the animation duration
+    });
+  }
 
   async ngOnInit(): Promise<void> {
-    console.log('appcomponent ngOnInit')
-
-    const isLoggedIn = this.keycloakService.isLoggedIn();
-    if (!isLoggedIn) {
-      this.keycloakService.login();
+    if (await this.keycloakService.isLoggedIn()) {
+      const userProfile = await this.keycloakService.loadUserProfile();
+      this.username = userProfile.username;
     }
 
-    if (isLoggedIn) {
-      console.log("logged in")
-      // Get username from Keycloak
-      try {
-        const userProfile = await this.keycloakService.loadUserProfile();
-        this.username = userProfile.username;
-      } catch (error) {
-        console.error('Error loading user profile:', error);
+    this.websocketService.messages$.subscribe(
+      msg => {
+        this.wsMgs = msg;
+        this.dataService.updateData(msg);
+      },
+      error => {
+        this.toastr.error('WebSocket connection error');
       }
+    );
 
-      this.websocketService.connect()
-      this.websocketService.messages$.subscribe(
-        (message: any) => {
-          this.processMessage(message);
-        },
-        (error) =>{
-          console.error('Error:', error);
-        },
-        () => {
-          console.log('WebSocket connection closed');
-        },
-      );
-    }
+    // Handle navigation events
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      // Determine navigation direction
+      const isForward = !this.previousUrl || this.previousUrl.length < event.url.length;
+      
+      // Trigger appropriate animation
+      if (isForward) {
+        this.animationService.triggerEnterAnimation();
+      } else {
+        this.animationService.triggerLeaveAnimation();
+        setTimeout(() => {
+          this.animationService.triggerEnterAnimation();
+        }, 300);
+      }
+      
+      // Store current URL for next navigation
+      this.previousUrl = event.url;
+    });
   }
 
-  openKeycloakProfile(): void {
-    const keycloakInstance = this.keycloakService.getKeycloakInstance();
-    keycloakInstance.accountManagement();
-  }
-
-  logout(): void {
-    this.keycloakService.logout(window.location.origin);
-  }
-
-  showSuccess() {
-
-  }
-
-  processMessage(message: any): void {
-    //this.wsMgs = message;
-    const payload = message.payload;
-    if (message.type === 'UPDATE') {
-      this.dataService.updateControllerOutput(payload)
-      this.updateControllerDetails(payload.mac);
-    } else if (message.type === 'SUCCESS') {
-      this.toastr.success(payload.message);
-    } else if (message.type === 'ERROR') {
-      this.toastr.error(payload.message);
-    } else if (message.type === 'LINKOK') {
-      this.toastr.success('Controller linked successfully');
-    } else if (message.type === 'LINK') {
-      this.toastr.info('Please press long right service button on controller', '',{
-        "timeOut": 60000,
-        progressBar: true,
-        closeButton: true
-      }).onHidden
-        .subscribe(()=>{
-          //console.log(1)
-          this.websocketService.sendMessage({
-            type: 'REQUESTFORLINK',
-            payload: { event: 'linkRequestTimeout' }
-          });
-        });
-    }
-
-    console.log('processMessage', message);
-  }
-
-  updateControllerDetails(mac: string): void {
-    const detailsComponent = (window as any).currentControllerDetails;
-    if (detailsComponent?.controller?.mac === mac) {
-      detailsComponent.refreshView();
-    }
+  async navigateToAccount() {
+    await this.keycloakService.getKeycloakInstance().accountManagement();
   }
 }
 

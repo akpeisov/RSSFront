@@ -17,8 +17,11 @@ export class ButtonCardComponent {
 
   private toggleSubject = new Subject<{ input: number, action: string }>();
 
-  constructor(private websocketService: WebsocketService,
-              private router: Router, private route: ActivatedRoute) {
+  constructor(
+    private websocketService: WebsocketService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
     this.toggleSubject.pipe(debounceTime(300)).subscribe(({ input, action }) => {
       this.websocketService.sendMessage({
         type: 'ACTION',
