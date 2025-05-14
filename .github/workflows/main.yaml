@@ -24,6 +24,7 @@ jobs:
     - run: npm install
     - run: npm install -g @angular/cli > /dev/null
     - run: ng build
+    - run: ls -lR /home/runner/work/RSSFront/RSSFront/dist
 
     - name: copy file via ssh key
       uses: wlixcc/SFTP-Deploy-Action@v1.2.4
@@ -31,6 +32,6 @@ jobs:
         server: akpeisov.kz
         username: cicd_web
         ssh_private_key: ${{ secrets.AKPEISOVKZ }}
-        local_path: "./dist/frontend/browser/"
+        local_path: "dist/rssfront/"
         remote_path: "/var/www/test.akpeisov.kz/"
         sftp_only: true
