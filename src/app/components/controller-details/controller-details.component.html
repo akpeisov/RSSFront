@@ -1,21 +1,40 @@
-<div>
-  <h2>{{ controller?.name }}</h2>
-  <p>Status: {{ controller?.status }}</p>
-  <p>Memory: {{ controller?.freeMemory }}</p>
-  <p>IP: {{ controller?.wifiip }}</p>
-  <button (click)="upload()">Upload to controller</button>
-  <button (click)="test()">Test</button>
-  <h3>Outputs</h3>
-  <div *ngFor="let output of controller?.outputs">
-<!--    <app-output-card [output]="output" ></app-output-card>-->
-    <app-output-card [output]="output" [mac]="controller?.mac"></app-output-card>
+<div class="controller-container">
+  <div class="controller-header">
+    <div class="header-main">
+      <h2>{{ controller?.name }}</h2>
+      <div class="action-buttons">
+        <button (click)="upload()">Upload to controller</button>
+        <button (click)="test()">Test</button>
+      </div>
+    </div>
+    <div class="status-info">
+      <p><span>Status</span> <span>{{ controller?.status }}</span></p>
+      <p><span>Memory</span> <span>{{ controller?.freeMemory }}</span></p>
+      <p><span>IP</span> <span>{{ controller?.wifiip }}</span></p>
+    </div>
   </div>
-  <h3>Inputs</h3>
-  <div *ngFor="let input of findInputs(controller?.inputs)">
-    <app-input-card [input]="input" [mac]="controller?.mac"></app-input-card>
+
+  <h3 class="section-title">Outputs</h3>
+  <div class="outputs-container">
+    <app-output-card *ngFor="let output of controller?.outputs" 
+                     [output]="output" 
+                     [mac]="controller?.mac">
+    </app-output-card>
   </div>
-  <h3>Buttons</h3>
-  <div *ngFor="let input of findButtons(controller?.inputs)">
-    <app-button-card [input]="input" [mac]="controller?.mac"></app-button-card>
+
+  <h3 class="section-title">Inputs</h3>
+  <div class="inputs-container">
+    <app-input-card *ngFor="let input of findInputs(controller?.inputs)"
+                    [input]="input" 
+                    [mac]="controller?.mac">
+    </app-input-card>
+  </div>
+
+  <h3 class="section-title">Buttons</h3>
+  <div class="buttons-container">
+    <app-button-card *ngFor="let input of findButtons(controller?.inputs)"
+                     [input]="input" 
+                     [mac]="controller?.mac">
+    </app-button-card>
   </div>
 </div>

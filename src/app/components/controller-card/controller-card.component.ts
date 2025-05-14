@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
-import {RouterLink} from "@angular/router";
+import { RouterLink } from "@angular/router";
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-controller-card',
@@ -7,7 +8,8 @@ import {RouterLink} from "@angular/router";
   styleUrls: ['./controller-card.component.scss'],
   standalone: true,
   imports: [
-    RouterLink
+    RouterLink,
+    CommonModule
   ]
 })
 export class ControllerCardComponent {

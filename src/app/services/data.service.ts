@@ -9,7 +9,7 @@ import {map, tap} from "rxjs/operators";
 })
 export class DataService {
   private controllers: any[] = [];
-  private apiUrl = 'http://192.168.4.120:8888/webapi/userDevices';
+  private apiUrl = 'https://api.akpeisov.kz/webapi/userDevices';
 
   constructor(private http: HttpClient) {}
 

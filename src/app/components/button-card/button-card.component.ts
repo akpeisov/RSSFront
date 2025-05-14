@@ -13,6 +13,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 export class ButtonCardComponent {
   @Input() input: any;
   @Input() mac: any;
+  isActive = false;
 
   private toggleSubject = new Subject<{ input: number, action: string }>();
 
@@ -27,22 +28,18 @@ export class ButtonCardComponent {
   }
 
   onClick(): void {
-    //const newValue = ($event.target as HTMLInputElement).checked
-    console.log("btn clicked ", this.input.id)
-    //this.toggleSubject.next({ output: this.output.id, action: newValue ? "on" : "off" });
-    this.toggleSubject.next({ input: this.input.id, action: "clicked" });
+    this.isActive = !this.isActive;
+    console.log("btn clicked ", this.input.id);
+    this.toggleSubject.next({ 
+      input: this.input.id, 
+      action: this.isActive ? "on" : "off" 
+    });
   }
 
   onEdit(): void {
-    // Переход на экран редактирования с передачей input через state
-    this.input.mac = this.mac
-    console.log('bcard', this.mac)
-    console.log(this.input)
-    // this.router.navigate(['/input-edit'], {
-    //   state: { input: this.input },
-    // });
+    this.input.mac = this.mac;
+    console.log('bcard', this.mac);
+    console.log(this.input);
     this.router.navigate(['/input-edit', this.input.uuid]);
-
-    //this.router.navigate(['/controller', mac]);
   }
 }

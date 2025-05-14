@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, RouterLink } from '@angular/router';
 import {WebsocketService} from "./services/websocket.service";
 import {KeycloakService} from "keycloak-angular";
 import {OutputCardComponent} from "./components/output-card/output-card.component";
@@ -8,34 +8,74 @@ import {IWSMsg} from "./model/ws-mgs";
 import {DataService} from "./services/data.service";
 import {ToastrService} from "ngx-toastr";
 import {take} from "rxjs";
+import { CommonModule } from '@angular/common';
+import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.component';
+import { IconComponent } from './components/shared/icon/icon.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet,
+  standalone: true,
+  imports: [
+    RouterOutlet,
+    RouterLink,
     OutputCardComponent,
-    HttpClientModule
+    HttpClientModule,
+    CommonModule,
+    ThemeToggleComponent,
+    IconComponent
   ],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
-   standalone: true
+  template: `
+    <div class="app-container">
+      <div class="app-header">
+        <a routerLink="/" class="home-link">
+          <h1>RSS Front</h1>
+        </a>
+        <div class="header-right">
+          <div class="user-info" *ngIf="username">
+            <button class="profile-button" (click)="openKeycloakProfile()">
+              <app-icon name="user"></app-icon>
+              <span class="username">{{ username }}</span>
+            </button>
+            <button class="logout-button" (click)="logout()" title="Logout">
+              <app-icon name="logout"></app-icon>
+            </button>
+          </div>
+          <app-theme-toggle></app-theme-toggle>
+        </div>
+      </div>
+      <router-outlet></router-outlet>
+    </div>
+  `,
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
   title = 'RSSFront';
   wsMgs : IWSMsg | undefined;
+  username: string | undefined;
 
   constructor(private websocketService: WebsocketService,
               private keycloakService: KeycloakService,
               private dataService: DataService,
               private toastr: ToastrService) {}
-  ngOnInit(): void {
+
+  async ngOnInit(): Promise<void> {
     console.log('appcomponent ngOnInit')
 
     const isLoggedIn = this.keycloakService.isLoggedIn();
-    if (!isLoggedIn)
+    if (!isLoggedIn) {
       this.keycloakService.login();
+    }
 
     if (isLoggedIn) {
       console.log("logged in")
+      // Get username from Keycloak
+      try {
+        const userProfile = await this.keycloakService.loadUserProfile();
+        this.username = userProfile.username;
+      } catch (error) {
+        console.error('Error loading user profile:', error);
+      }
+
       this.websocketService.connect()
       this.websocketService.messages$.subscribe(
         (message: any) => {
@@ -51,7 +91,14 @@ export class AppComponent {
     }
   }
 
+  openKeycloakProfile(): void {
+    const keycloakInstance = this.keycloakService.getKeycloakInstance();
+    keycloakInstance.accountManagement();
+  }
 
+  logout(): void {
+    this.keycloakService.logout(window.location.origin);
+  }
 
   showSuccess() {
 
@@ -93,8 +140,6 @@ export class AppComponent {
       detailsComponent.refreshView();
     }
   }
-
-
 }
 
 
