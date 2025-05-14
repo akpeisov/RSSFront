@@ -54,11 +54,13 @@ export class ControllerDetailsComponent implements OnInit {
     return 0;
   }
 
-  findInputs(input: any[]): any[] {
+  findInputs(input: any[] | null | undefined): any[] {
+    if (!input) return [];
     return input.filter(p => p.id <= 15);
   }
 
-  findButtons(input: any[]): any[] {
+  findButtons(input: any[] | null | undefined): any[] {
+    if (!input) return [];
     return input.filter(p => p.id > 15);
   }
 
