@@ -1,9 +1,7 @@
 <div class="input-edit-container">
   <div class="header">
     <button class="back-button" (click)="back()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M15 18l-6-6 6-6"/>
-      </svg>
+      <img src="assets/icons/arrow-back.svg" width="24" height="24" alt="Back" />
     </button>
     <h2>Input Configuration</h2>
   </div>
@@ -44,24 +42,17 @@
                         (click)="moveActionUp(i, j)" 
                         [disabled]="!canMoveUp(i, j)"
                         title="Move up">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 15l-6-6-6 6"/>
-                  </svg>
+                  <img src="assets/icons/arrow-up.svg" width="16" height="16" alt="Up" />
                 </button>
                 <button class="order-button" 
                         (click)="moveActionDown(i, j)" 
                         [disabled]="!canMoveDown(i, j)"
                         title="Move down">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 9l6 6 6-6"/>
-                  </svg>
+                  <img src="assets/icons/arrow-down.svg" width="16" height="16" alt="Down" />
                 </button>
               </div>
               <button class="remove-button" (click)="removeAction(i, j)" title="Remove action">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
+                <img src="assets/icons/close.svg" width="20" height="20" alt="Remove" />
               </button>
             </div>
             <div class="action-grid">
@@ -92,10 +83,7 @@
         </div>
 
         <button class="add-button" (click)="addAction(i)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
+          <img src="assets/icons/plus.svg" width="20" height="20" alt="Add" />
           Add Action
         </button>
       </div>
