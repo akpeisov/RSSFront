@@ -24,6 +24,8 @@ export class InputEditComponent implements OnInit {
   input: any;
   outputs: any[] = [];
   controllerMac: string | null = null;
+  deletingAction: { eventIndex: number, actionIndex: number } | null = null;
+  addingAction: { eventIndex: number, actionIndex: number } | null = null;
 
   private toggleSubject = new Subject<{ payload:any }>();
 
@@ -82,13 +84,10 @@ export class InputEditComponent implements OnInit {
   }
 
   addAction(eventIndex: number): void {
-    // Добавление нового действия в событие
     const actions = this.input.events[eventIndex].actions;
-
-    // Найти максимальное значение order среди текущих действий
     const maxOrder = actions.reduce((max: number, action: any) => {
       return action.order > max ? action.order : max;
-    }, -1); // -1 чтобы первый элемент получил order = 0
+    }, -1);
 
     actions.push({
       outputID: null,
@@ -98,6 +97,12 @@ export class InputEditComponent implements OnInit {
       output: 0,
       order: maxOrder + 1
     });
+
+    // Set the adding animation state
+    this.addingAction = { eventIndex, actionIndex: actions.length - 1 };
+    setTimeout(() => {
+      this.addingAction = null;
+    }, 300); // Match this with the CSS animation duration
   }
 
   onOutputChange(action: any): void {
@@ -106,8 +111,55 @@ export class InputEditComponent implements OnInit {
   }
 
   removeAction(eventIndex: number, actionIndex: number): void {
-    // Удаление действия из события
-    this.input.events[eventIndex].actions.splice(actionIndex, 1);
+    this.deletingAction = { eventIndex, actionIndex };
+    setTimeout(() => {
+      this.input.events[eventIndex].actions.splice(actionIndex, 1);
+      this.deletingAction = null;
+    }, 300); // Match this with the CSS animation duration
+  }
+
+  isDeleting(eventIndex: number, actionIndex: number): boolean {
+    return this.deletingAction?.eventIndex === eventIndex && 
+           this.deletingAction?.actionIndex === actionIndex;
+  }
+
+  isAdding(eventIndex: number, actionIndex: number): boolean {
+    return this.addingAction?.eventIndex === eventIndex && 
+           this.addingAction?.actionIndex === actionIndex;
+  }
+
+  moveActionUp(eventIndex: number, actionIndex: number): void {
+    const actions = this.input.events[eventIndex].actions;
+    if (actionIndex > 0) {
+      // Swap orders
+      const currentOrder = actions[actionIndex].order;
+      actions[actionIndex].order = actions[actionIndex - 1].order;
+      actions[actionIndex - 1].order = currentOrder;
+      
+      // Swap positions in array
+      [actions[actionIndex], actions[actionIndex - 1]] = [actions[actionIndex - 1], actions[actionIndex]];
+    }
+  }
+
+  moveActionDown(eventIndex: number, actionIndex: number): void {
+    const actions = this.input.events[eventIndex].actions;
+    if (actionIndex < actions.length - 1) {
+      // Swap orders
+      const currentOrder = actions[actionIndex].order;
+      actions[actionIndex].order = actions[actionIndex + 1].order;
+      actions[actionIndex + 1].order = currentOrder;
+      
+      // Swap positions in array
+      [actions[actionIndex], actions[actionIndex + 1]] = [actions[actionIndex + 1], actions[actionIndex]];
+    }
+  }
+
+  canMoveUp(eventIndex: number, actionIndex: number): boolean {
+    return actionIndex > 0;
+  }
+
+  canMoveDown(eventIndex: number, actionIndex: number): boolean {
+    return actionIndex < this.input.events[eventIndex].actions.length - 1;
   }
 
   save(): void {
