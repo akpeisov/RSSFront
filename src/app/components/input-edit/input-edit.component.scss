@@ -43,7 +43,7 @@
 
     h3 {
       color: var(--text-color);
-      margin: 24px 0 16px;
+      margin: 0px 0 16px;
       font-size: 1.2rem;
     }
   }
@@ -67,6 +67,7 @@
       color: var(--text-color);
       font-size: 1rem;
       transition: border-color 0.3s;
+      box-sizing: border-box;
 
       &:focus {
         outline: none;
@@ -137,9 +138,23 @@
       gap: 8px;
     }
 
-    .action-controls {
-      display: flex;
-      gap: 8px;
+    .action-grid {
+      display: grid;
+      grid-template-columns: minmax(200px, 1fr) minmax(150px, 1fr) minmax(80px, 1fr);
+      gap: 16px;
+      align-items: end;
+
+      .form-group {
+        margin-bottom: 0;
+        width: 100%;
+
+        input[type="text"],
+        input[type="number"],
+        select {
+          width: 100%;
+          box-sizing: border-box;
+        }
+      }
     }
   }
 
@@ -248,6 +263,27 @@
       }
     }
   }
+}
+
+.form-fields-row {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+@media (max-width: 767px) {
+  .form-fields-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .form-fields-row .form-group {
+    width: 100%;
+  }
+}
+
+.form-fields-row .form-group {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 // Responsive adjustments
