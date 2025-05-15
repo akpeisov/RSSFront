@@ -12,12 +12,8 @@ import { AnimationService } from '../../services/animation.service';
   selector: 'app-input-edit',
   templateUrl: './input-edit.component.html',
   styleUrls: ['./input-edit.component.scss'],
-  imports: [
-    FormsModule,
-    NgForOf,
-    NgIf
-  ],
-  standalone: true
+  standalone: true,
+  imports: [FormsModule, NgForOf, NgIf]
 })
 
 export class InputEditComponent implements OnInit {
@@ -26,6 +22,7 @@ export class InputEditComponent implements OnInit {
   controllerMac: string | null = null;
   deletingAction: { eventIndex: number, actionIndex: number } | null = null;
   addingAction: { eventIndex: number, actionIndex: number } | null = null;
+  swappingActions: { eventIndex: number, from: number, to: number, direction: 'up' | 'down' } | null = null;
 
   private toggleSubject = new Subject<{ payload:any }>();
 
@@ -131,27 +128,45 @@ export class InputEditComponent implements OnInit {
   moveActionUp(eventIndex: number, actionIndex: number): void {
     const actions = this.input.events[eventIndex].actions;
     if (actionIndex > 0) {
-      // Swap orders
-      const currentOrder = actions[actionIndex].order;
-      actions[actionIndex].order = actions[actionIndex - 1].order;
-      actions[actionIndex - 1].order = currentOrder;
-      
-      // Swap positions in array
-      [actions[actionIndex], actions[actionIndex - 1]] = [actions[actionIndex - 1], actions[actionIndex]];
+      this.swappingActions = { eventIndex, from: actionIndex, to: actionIndex - 1, direction: 'up' };
+      setTimeout(() => {
+        // Swap orders
+        const currentOrder = actions[actionIndex].order;
+        actions[actionIndex].order = actions[actionIndex - 1].order;
+        actions[actionIndex - 1].order = currentOrder;
+        // Swap positions in array
+        [actions[actionIndex], actions[actionIndex - 1]] = [actions[actionIndex - 1], actions[actionIndex]];
+        this.swappingActions = null;
+      }, 300); // 10x slower
     }
   }
 
   moveActionDown(eventIndex: number, actionIndex: number): void {
     const actions = this.input.events[eventIndex].actions;
     if (actionIndex < actions.length - 1) {
-      // Swap orders
-      const currentOrder = actions[actionIndex].order;
-      actions[actionIndex].order = actions[actionIndex + 1].order;
-      actions[actionIndex + 1].order = currentOrder;
-      
-      // Swap positions in array
-      [actions[actionIndex], actions[actionIndex + 1]] = [actions[actionIndex + 1], actions[actionIndex]];
+      this.swappingActions = { eventIndex, from: actionIndex, to: actionIndex + 1, direction: 'down' };
+      setTimeout(() => {
+        // Swap orders
+        const currentOrder = actions[actionIndex].order;
+        actions[actionIndex].order = actions[actionIndex + 1].order;
+        actions[actionIndex + 1].order = currentOrder;
+        // Swap positions in array
+        [actions[actionIndex], actions[actionIndex + 1]] = [actions[actionIndex + 1], actions[actionIndex]];
+        this.swappingActions = null;
+      }, 300); // 10x slower
     }
+  }
+
+  getSwapDirection(eventIndex: number, actionIndex: number): string | null {
+    if (!this.swappingActions || this.swappingActions.eventIndex !== eventIndex) return null;
+    if (this.swappingActions.from === actionIndex) return this.swappingActions.direction;
+    if (this.swappingActions.to === actionIndex) return this.swappingActions.direction === 'up' ? 'down' : 'up';
+    return null;
+  }
+
+  isSwapping(eventIndex: number, actionIndex: number): boolean {
+    return !!(this.swappingActions && this.swappingActions.eventIndex === eventIndex &&
+      (this.swappingActions.from === actionIndex || this.swappingActions.to === actionIndex));
   }
 
   canMoveUp(eventIndex: number, actionIndex: number): boolean {
