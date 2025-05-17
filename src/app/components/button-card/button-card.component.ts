@@ -31,11 +31,12 @@ export class ButtonCardComponent {
   }
 
   onClick(): void {
-    this.isActive = !this.isActive;
+    // this.isActive = !this.isActive;
     console.log("btn clicked ", this.input.id);
     this.toggleSubject.next({ 
-      input: this.input.id, 
-      action: this.isActive ? "on" : "off" 
+      input: this.input.id,
+      action: "on"
+      // action: this.isActive ? "on" : "off" 
     });
   }
 
