@@ -170,6 +170,7 @@ export class AppComponent implements OnInit {
           console.log('WebSocket message received:', msg);
           this.wsMgs = msg;
           this.dataService.updateData(msg);
+          this.processMessage(msg);
         },
         error => {
           console.error('WebSocket error:', error);
@@ -207,6 +208,43 @@ export class AppComponent implements OnInit {
 
   async navigateToAccount() {
     await this.keycloakService.getKeycloakInstance().accountManagement();
+  }
+
+  processMessage(message: any): void {
+    //this.wsMgs = message;
+    const payload = message.payload;
+    if (message.type === 'UPDATE') {
+      this.dataService.updateControllerOutput(payload)
+      this.updateControllerDetails(payload.mac);
+    } else if (message.type === 'SUCCESS') {
+      this.toastr.success(payload.message);
+    } else if (message.type === 'ERROR') {
+      this.toastr.error(payload.message);
+    } else if (message.type === 'LINKOK') {
+      this.toastr.success('Controller linked successfully');
+    } else if (message.type === 'LINK') {
+      this.toastr.info('Please press long right service button on controller', '', {
+        "timeOut": 60000,
+        progressBar: true,
+        closeButton: true
+      }).onHidden
+        .subscribe(() => {
+          //console.log(1)
+          this.websocketService.sendMessage({
+            type: 'REQUESTFORLINK',
+            payload: { event: 'linkRequestTimeout' }
+          });
+        });
+    }
+
+    console.log('processMessage', message);
+  }
+
+  updateControllerDetails(mac: string): void {
+    const detailsComponent = (window as any).currentControllerDetails;
+    if (detailsComponent?.controller?.mac === mac) {
+      detailsComponent.refreshView();
+    }
   }
 }
 
