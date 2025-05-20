@@ -167,7 +167,7 @@ export class AppComponent implements OnInit {
       
       this.websocketService.messages$.subscribe(
         msg => {
-          console.log('WebSocket message received:', msg);
+          // console.log('WebSocket message received:', msg);
           this.wsMgs = msg;
           this.dataService.updateData(msg);
           this.processMessage(msg);

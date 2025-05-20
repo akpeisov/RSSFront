@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { EMPTY, ReplaySubject, OperatorFunction } from 'rxjs';
-import { catchError, switchAll, tap } from 'rxjs/operators';
+import { EMPTY, ReplaySubject, OperatorFunction, timer } from 'rxjs';
+import { catchError, switchAll, tap, switchMap } from 'rxjs/operators';
 import { ErrorService } from './error.service';
 import { KeycloakService } from 'keycloak-angular';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
@@ -19,6 +19,8 @@ export class WebsocketService {
       type: '',
     },
   };
+  private tokenRefreshTimer: any;
+  private readonly REFRESH_THRESHOLD = 70; // seconds before expiration to refresh
 
   private messagesSubject$ = new ReplaySubject();
   public messages$ = this.messagesSubject$.pipe(
@@ -33,7 +35,67 @@ export class WebsocketService {
   constructor(
     private errorService: ErrorService,
     private keycloak: KeycloakService
-  ) {}
+  ) {
+    this.setupTokenRefresh();
+  }
+
+  private setupTokenRefresh() {
+    if (this.tokenRefreshTimer) {
+      clearTimeout(this.tokenRefreshTimer);
+    }
+    this.scheduleTokenRefresh();
+  }
+
+  private scheduleTokenRefresh() {
+    try {
+      const token = this.keycloak.getKeycloakInstance().token;
+      if (!token) return;
+
+      const tokenData = JSON.parse(atob(token.split('.')[1]));
+      const expirationTime = tokenData.exp * 1000;
+      const currentTime = Date.now();
+      const timeUntilExpiration = expirationTime - currentTime;
+      const timeUntilRefresh = timeUntilExpiration - (this.REFRESH_THRESHOLD * 1000);
+
+      if (timeUntilRefresh <= 0) {
+        this.refreshToken();
+      } else {
+        console.log(`Scheduling token refresh in ${Math.floor(timeUntilRefresh / 1000)} seconds`);
+        this.tokenRefreshTimer = setTimeout(() => {
+          this.refreshToken();
+        }, timeUntilRefresh);
+      }
+    } catch (error) {
+      console.error('Error scheduling token refresh:', error);
+      this.errorService.handle('Failed to schedule token refresh');
+    }
+  }
+
+  private async refreshToken() {
+    try {
+      const isLoggedIn = await this.keycloak.isLoggedIn();
+      if (isLoggedIn) {
+        await this.keycloak.updateToken(this.REFRESH_THRESHOLD);
+        console.log('Token refreshed successfully');
+        
+        if (this.ws) {
+          this.sendHelloMessage();
+        }
+        this.scheduleTokenRefresh();
+      }
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      this.errorService.handle('Failed to refresh token');
+    }
+  }
+
+  private sendHelloMessage() {
+    this.myHello.type = 'HELLO';
+    this.myHello.payload.token = String(this.keycloak.getKeycloakInstance().token);
+    this.myHello.payload.type = 'WEB';
+    console.log('Sending HELLO message with refreshed token');
+    this.ws.next(this.myHello);
+  }
 
   public sendMessage(message: any): void {
     console.log('Sending message:', message);
@@ -57,12 +119,7 @@ export class WebsocketService {
       openObserver: {
         next: (event: Event) => {
           console.log('WebSocket connection opened:', event);
-
-          this.myHello.type = 'HELLO';
-          this.myHello.payload.token = String(this.keycloak.getKeycloakInstance().token);
-          this.myHello.payload.type = 'WEB';
-          console.log('Sending HELLO message:', this.myHello);
-          this.ws.next(this.myHello);
+          this.sendHelloMessage();
         },
       },
       closeObserver: {
@@ -73,7 +130,7 @@ export class WebsocketService {
       }
     });
 
-    const messages$ = this.ws.pipe(
+    const wsMessages$ = this.ws.pipe(
       tap(msg => console.log('Raw WebSocket message received:', msg)),
       catchError((e) => {
         console.error('Error in WebSocket stream:', e);
@@ -81,6 +138,15 @@ export class WebsocketService {
       })
     );
     
-    this.messagesSubject$.next(messages$);
+    this.messagesSubject$.next(wsMessages$);
+  }
+
+  ngOnDestroy() {
+    if (this.tokenRefreshTimer) {
+      clearTimeout(this.tokenRefreshTimer);
+    }
+    if (this.ws) {
+      this.ws.complete();
+    }
   }
 }
