@@ -14,27 +14,89 @@
     </div>
   </div>
 
-  <h3 class="section-title">Outputs</h3>
-  <div class="outputs-container">
-    <app-output-card *ngFor="let output of controller?.outputs" 
-                     [output]="output" 
-                     [mac]="controller?.mac">
-    </app-output-card>
+  <!-- Mobile Tabs -->
+  <div class="mobile-tabs">
+    <button class="tab-button" [class.active]="activeTab === 'outputs'" (click)="setActiveTab('outputs')">
+      Outputs
+    </button>
+    <button class="tab-button" [class.active]="activeTab === 'inputs'" (click)="setActiveTab('inputs')">
+      Inputs
+    </button>
+    <button class="tab-button" [class.active]="activeTab === 'buttons'" (click)="setActiveTab('buttons')">
+      Buttons
+    </button>
   </div>
 
-  <h3 class="section-title">Inputs</h3>
-  <div class="inputs-container">
-    <app-input-card *ngFor="let input of findInputs(controller?.inputs)"
-                    [input]="input" 
-                    [mac]="controller?.mac">
-    </app-input-card>
+  <!-- Desktop View -->
+  <div class="desktop-view">
+    <h3 class="section-title">Outputs</h3>
+    <div class="outputs-container">
+      <app-output-card *ngFor="let output of controller?.outputs" 
+                       [output]="output" 
+                       [mac]="controller?.mac">
+      </app-output-card>
+    </div>
+
+    <h3 class="section-title">Inputs</h3>
+    <div class="inputs-container">
+      <app-input-card *ngFor="let input of findInputs(controller?.inputs)"
+                      [input]="input" 
+                      [mac]="controller?.mac">
+      </app-input-card>
+    </div>
+
+    <h3 class="section-title">Buttons</h3>
+    <div class="buttons-container">
+      <app-button-card *ngFor="let input of findButtons(controller?.inputs)"
+                       [input]="input" 
+                       [mac]="controller?.mac">
+      </app-button-card>
+    </div>
   </div>
 
-  <h3 class="section-title">Buttons</h3>
-  <div class="buttons-container">
-    <app-button-card *ngFor="let input of findButtons(controller?.inputs)"
-                     [input]="input" 
-                     [mac]="controller?.mac">
-    </app-button-card>
+  <!-- Mobile View -->
+  <div class="mobile-view">
+    <div class="tab-content" 
+         [ngClass]="{
+           'active': activeTab === 'outputs',
+           'slide-right': getTabAnimationClass('outputs') === 'slide-right',
+           'slide-left': getTabAnimationClass('outputs') === 'slide-left'
+         }">
+      <div class="outputs-container">
+        <app-output-card *ngFor="let output of controller?.outputs" 
+                         [output]="output" 
+                         [mac]="controller?.mac">
+        </app-output-card>
+      </div>
+    </div>
+
+    <div class="tab-content" 
+         [ngClass]="{
+           'active': activeTab === 'inputs',
+           'slide-right': getTabAnimationClass('inputs') === 'slide-right',
+           'slide-left': getTabAnimationClass('inputs') === 'slide-left'
+         }">
+
+      <div class="inputs-container">
+        <app-input-card *ngFor="let input of findInputs(controller?.inputs)"
+                        [input]="input" 
+                        [mac]="controller?.mac">
+        </app-input-card>
+      </div>
+    </div>
+
+    <div class="tab-content" 
+         [ngClass]="{
+           'active': activeTab === 'buttons',
+           'slide-right': getTabAnimationClass('buttons') === 'slide-right',
+           'slide-left': getTabAnimationClass('buttons') === 'slide-left'
+         }">
+      <div class="buttons-container">
+        <app-button-card *ngFor="let input of findButtons(controller?.inputs)"
+                         [input]="input" 
+                         [mac]="controller?.mac">
+        </app-button-card>
+      </div>
+    </div>
   </div>
 </div>
