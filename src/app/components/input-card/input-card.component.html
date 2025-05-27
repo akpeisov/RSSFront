@@ -2,7 +2,7 @@
   <span>{{ input.name }}</span>
   <span class="input-type">{{ input.type }}</span>
   <button class="settings-button" (click)="onEdit()">
-    <img src="assets/icons/settings-icon.svg" alt="Edit" />
+    <img src="assets/icons/edit.svg" width="20" height="20" alt="Edit" />
   </button>
-  <span>{{ input.state }}</span>
+  <div class="led-indicator" [class.active]="input.state === 'on'"></div>
 </div>
