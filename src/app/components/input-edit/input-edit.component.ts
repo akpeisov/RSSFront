@@ -23,6 +23,7 @@ export class InputEditComponent implements OnInit {
   deletingAction: { eventIndex: number, actionIndex: number } | null = null;
   addingAction: { eventIndex: number, actionIndex: number } | null = null;
   swappingActions: { eventIndex: number, from: number, to: number, direction: 'up' | 'down' } | null = null;
+  isBtn: boolean = false;
 
   private toggleSubject = new Subject<{ payload:any }>();
 

@@ -10,7 +10,6 @@ import { Router } from "@angular/router";
 export class InputCardComponent {
   @Input() input: any;
   @Input() mac: any;
-
   constructor(private router: Router) {}
 
   onEdit(): void {

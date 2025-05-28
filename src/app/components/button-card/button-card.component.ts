@@ -42,6 +42,7 @@ export class ButtonCardComponent {
 
   onEdit(): void {
     this.input.mac = this.mac;
+    this.input.isBtn = true;
     console.log('bcard', this.mac);
     console.log(this.input);
     this.router.navigate(['/input-edit', this.input.uuid]);
