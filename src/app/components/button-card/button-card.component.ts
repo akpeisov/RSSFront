@@ -2,11 +2,12 @@ import {Component, Input} from '@angular/core';
 import {debounceTime, Subject} from "rxjs";
 import {WebsocketService} from "../../services/websocket.service";
 import {ActivatedRoute, Router} from "@angular/router";
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-button-card',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './button-card.component.html',
   styleUrl: './button-card.component.scss'
 })
@@ -16,6 +17,13 @@ export class ButtonCardComponent {
   isActive = false;
 
   private toggleSubject = new Subject<{ input: number, action: string }>();
+
+  // Long press/progress bar state
+  isHolding = false;
+  progress = 0; // 0 to 100
+  private holdTimeout: any;
+  private holdStart = 0;
+  private progressInterval: any;
 
   constructor(
     private websocketService: WebsocketService,
@@ -30,13 +38,42 @@ export class ButtonCardComponent {
     });
   }
 
-  onClick(): void {
-    // this.isActive = !this.isActive;
-    console.log("btn clicked ", this.input.id);
-    this.toggleSubject.next({ 
+  onButtonDown(): void {
+    this.isHolding = true;
+    this.progress = 0;
+    this.holdStart = Date.now();
+    this.progressInterval = setInterval(() => {
+      const elapsed = Date.now() - this.holdStart;
+      this.progress = Math.min(100, (elapsed / 1000) * 100);
+      if (this.progress >= 100) {
+        this.progress = 100;
+        clearInterval(this.progressInterval);
+      }
+    }, 16);
+    this.holdTimeout = setTimeout(() => {
+      this.sendAction('longpress');
+      this.isHolding = false;
+      this.progress = 0;
+      clearInterval(this.progressInterval);
+    }, 1000);
+  }
+
+  onButtonUp(): void {
+    if (this.isHolding) {
+      clearTimeout(this.holdTimeout);
+      clearInterval(this.progressInterval);
+      if (this.progress < 100) {
+        this.sendAction('on');
+      }
+      this.isHolding = false;
+      this.progress = 0;
+    }
+  }
+
+  sendAction(action: string): void {
+    this.toggleSubject.next({
       input: this.input.id,
-      action: "on"
-      // action: this.isActive ? "on" : "off" 
+      action
     });
   }
 
