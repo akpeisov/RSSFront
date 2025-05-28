@@ -13,7 +13,7 @@
         <input id="name" type="text" [(ngModel)]="input.name" placeholder="Enter input name" />
       </div>
 
-      <div class="form-group">
+      <div *ngIf="!input.isBtn" class="form-group">
         <label for="type">Input Type</label>
         <select id="type" [(ngModel)]="input.type" (change)="updateEvents()">
           <option value="BTN">Button</option>

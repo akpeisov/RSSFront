@@ -41,28 +41,55 @@
   }
 
   .ios-button {
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #fff;
-    background: linear-gradient(135deg, #4caf50, #81c784);
-    border: none;
-    border-radius: 25px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.2s ease;
+    display: none;
   }
-  
-  .ios-button:active {
-    background: linear-gradient(135deg, #388e3c, #66bb6a);
-    transform: scale(0.97);
+}
+
+.flat-btn {
+  background: var(--primary-color, #1976d2);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 4px var(--shadow-color, rgba(0,0,0,0.08));
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  margin-left: 12px;
+  outline: none;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+
+  &:hover, &:focus {
+    background: var(--primary-color-hover, #1565c0);
+    box-shadow: 0 4px 8px var(--shadow-color-hover, rgba(0,0,0,0.12));
+    transform: translateY(-1px) scale(1.03);
   }
-  
-  .ios-button.off {
-    background: linear-gradient(135deg, #e57373, #ef9a9a);
+  &:active {
+    background: var(--primary-color-active, #0d47a1);
+    box-shadow: 0 1px 2px var(--shadow-color, rgba(0,0,0,0.08));
+    transform: scale(0.98);
   }
-  
-  .ios-button.off:active {
-    background: linear-gradient(135deg, #c62828, #e57373);
+
+  .progress-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    pointer-events: none;
+    z-index: 0;
+    background: transparent;
   }
+  .progress {
+    height: 100%;
+    background: rgba(255,255,255,0.25);
+    transition: width 0.05s linear;
+  }
+}
+
+.ios-btn, .ios-button {
+  display: none !important;
 }
