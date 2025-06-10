@@ -1,16 +1,17 @@
 <div class="controller-container">
   <div class="controller-header">
     <div class="header-main">
-      <h2>{{ controller?.name }}</h2>
+      <div class="title-section">
+        <span class="status-indicator">
+          <i [class.online]="controller?.status === 'online'" [class.offline]="controller?.status !== 'online'"></i>
+        </span>
+        <h2>{{ controller?.name }}</h2>
+      </div>
       <div class="action-buttons">
+        <button (click)="showInfo()">Info</button>
         <button (click)="upload()">Upload to controller</button>
         <button (click)="test()">Test</button>
       </div>
-    </div>
-    <div class="status-info">
-      <p><span>Status</span> <span>{{ controller?.status }}</span></p>
-      <p><span>Memory</span> <span>{{ controller?.freeMemory }}</span></p>
-      <p><span>IP</span> <span>{{ controller?.wifiip }}</span></p>
     </div>
   </div>
 
@@ -96,6 +97,31 @@
                          [input]="input" 
                          [mac]="controller?.mac">
         </app-button-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Popup -->
+  <div class="popup-overlay" *ngIf="showInfoPopup" (click)="showInfoPopup = false">
+    <div class="popup-content" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>Controller Information</h3>
+        <button class="close-button" (click)="showInfoPopup = false">
+          <img src="assets/icons/close.svg" width="20" height="20" alt="Close" />
+        </button>
+      </div>
+      <div class="popup-body">
+        <div class="status-info">
+          <p><span>Status</span> <span>{{ controller?.status }}</span></p>
+          <p><span>Memory</span> <span>{{ controller?.freeMemory }}</span></p>
+          <p><span>IP</span> <span>{{ controller?.wifiip }}</span></p>
+          <p><span>MAC</span> <span>{{ controller?.mac }}</span></p>
+          <p><span>Version</span> <span>{{ controller?.version }}</span></p>
+          <p><span>Firmware</span> <span>{{ controller?.firmware }}</span></p>
+          <p><span>Hardware</span> <span>{{ controller?.hardware }}</span></p>
+          <p><span>Serial</span> <span>{{ controller?.serial }}</span></p>
+          <p><span>Wifi</span> <span>{{ controller?.wifiip }}</span></p>
+        </div>
       </div>
     </div>
   </div>
