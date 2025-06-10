@@ -63,7 +63,7 @@ export class InputEditComponent implements OnInit {
     switch (type) {
       case 'SW':
         return ['on', 'off'];
-      case 'INWSW':
+      case 'INVSW':
       case 'BTN':
         return ['toggle'];
       default:
@@ -72,13 +72,38 @@ export class InputEditComponent implements OnInit {
   }
 
   updateEvents(): void {
-    // Обновление списка событий на основе типа входа
-    const eventMap = {
-      BTN: ['press', 'long press'],
-      SW: ['on', 'off'],
-      INVSW: ['toggle'],
-    };
-
+    // Update events based on input type
+    if (this.input.type === 'INVSW') {
+      // For INVSW, ensure there's only one event with 'toggle'
+      this.input.events = [{
+        event: 'toggle',
+        actions: this.input.events[0]?.actions || []
+      }];
+    } else if (this.input.type === 'SW') {
+      // For SW, ensure there are 'on' and 'off' events
+      this.input.events = [
+        {
+          event: 'on',
+          actions: this.input.events.find((e: { event: string }) => e.event === 'on')?.actions || []
+        },
+        {
+          event: 'off',
+          actions: this.input.events.find((e: { event: string }) => e.event === 'off')?.actions || []
+        }
+      ];
+    } else if (this.input.type === 'BTN') {
+      // For BTN, ensure there are 'press' and 'long press' events
+      this.input.events = [
+        {
+          event: 'press',
+          actions: this.input.events.find((e: { event: string }) => e.event === 'press')?.actions || []
+        },
+        {
+          event: 'long press',
+          actions: this.input.events.find((e: { event: string }) => e.event === 'long press')?.actions || []
+        }
+      ];
+    }
   }
 
   addAction(eventIndex: number): void {
@@ -87,9 +112,15 @@ export class InputEditComponent implements OnInit {
       return action.order > max ? action.order : max;
     }, -1);
 
+    // Set default action based on input type and event
+    let defaultAction = 'toggle';
+    if (this.input.type === 'SW') {
+      defaultAction = this.input.events[eventIndex].event === 'on' ? 'on' : 'off';
+    }
+
     actions.push({
       outputID: null,
-      action: 'toggle',
+      action: defaultAction,
       duration: 0,
       slaveId: 0,
       output: 0,

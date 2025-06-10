@@ -45,9 +45,7 @@
 
     .basic-settings {
       display: flex;
-      flex-direction: row;
-      gap: 24px;
-      margin-bottom: 32px;
+      flex-direction: column;
       padding-bottom: 24px;
       border-bottom: 1px solid var(--border-color);
     }
@@ -83,7 +81,7 @@
     }
 
     input, select {
-      width: calc(100% - 48px);
+      width: 100%;
       padding: 8px 12px;
       border: 1px solid var(--border-color);
       border-radius: 4px;

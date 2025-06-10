@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import {DataService} from "../../services/data.service";
 import {OutputCardComponent} from "../output-card/output-card.component";
 import {InputCardComponent} from "../input-card/input-card.component";
-import {NgFor, NgClass} from "@angular/common";
+import {NgFor, NgClass, NgIf} from "@angular/common";
 import {ButtonCardComponent} from "../button-card/button-card.component";
 import {debounceTime, Subject} from "rxjs";
 import {WebsocketService} from "../../services/websocket.service";
@@ -17,6 +17,7 @@ import {WebsocketService} from "../../services/websocket.service";
     InputCardComponent,
     NgFor, 
     NgClass,
+    NgIf,
     ButtonCardComponent
   ]
 })
@@ -24,6 +25,7 @@ export class ControllerDetailsComponent implements OnInit {
   controller: any;
   activeTab: 'outputs' | 'inputs' | 'buttons' = 'outputs';
   previousTab: 'outputs' | 'inputs' | 'buttons' | null = null;
+  showInfoPopup: boolean = false;
 
   private toggleSubject = new Subject<{ mac:string }>();
 
@@ -114,6 +116,10 @@ export class ControllerDetailsComponent implements OnInit {
 
   test() {
     this.toggleSubject.next( {mac: "test" });
+  }
+
+  showInfo(): void {
+    this.showInfoPopup = true;
   }
 
 }
