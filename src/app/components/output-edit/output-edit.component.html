@@ -23,29 +23,31 @@
 
     <!-- Timer-specific fields -->
     <div class="form-group" *ngIf="output.type === 't'">
-      <label for="on">Кол-во секунд включения</label>
-      <input type="number" id="on" [(ngModel)]="output.on" min="0" />
+      <label for="on">On Time (seconds)</label>
+      <div class="number-input-group">
+        <button class="number-btn" (click)="decrementValue('on')">-</button>
+        <input type="number" id="on" [(ngModel)]="output.on" min="0" />
+        <button class="number-btn" (click)="incrementValue('on')">+</button>
+      </div>
     </div>
 
     <div class="form-group" *ngIf="output.type === 't'">
-      <label for="off">Кол-во секунд выключения</label>
-      <input type="number" id="off" [(ngModel)]="output.off" min="0" />
+      <label for="off">Off Time (seconds)</label>
+      <div class="number-input-group">
+        <button class="number-btn" (click)="decrementValue('off')">-</button>
+        <input type="number" id="off" [(ngModel)]="output.off" min="0" />
+        <button class="number-btn" (click)="incrementValue('off')">+</button>
+      </div>
     </div>
 
     <!-- Standard output fields -->
     <div class="form-group" *ngIf="output.type === 's'">
-      <label for="limit">Лимит включения (сек)</label>
-      <input type="number" id="limit" [(ngModel)]="output.limit" min="0" />
-    </div>
-
-    <div class="form-group">
-      <label for="alice">Алиса</label>
-      <input type="checkbox" id="alice" [(ngModel)]="output.alice" (ngModelChange)="onAliceChange()" />
-    </div>
-
-    <div class="form-group" *ngIf="output.alice">
-      <label for="room">Название комнаты</label>
-      <input type="text" id="room" [(ngModel)]="output.room" />
+      <label for="limit">Limit (seconds)</label>
+      <div class="number-input-group">
+        <button class="number-btn" (click)="decrementValue('limit')">-</button>
+        <input type="number" id="limit" [(ngModel)]="output.limit" min="0" />
+        <button class="number-btn" (click)="incrementValue('limit')">+</button>
+      </div>
     </div>
 
     <div class="form-group">
@@ -56,6 +58,21 @@
         </option>
       </select>
     </div>
+
+    <div class="form-group inline">
+      <label for="alice">Alice</label>
+      <label class="switch">
+        <input type="checkbox" id="alice" [(ngModel)]="output.alice" (ngModelChange)="onAliceChange()" />
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <div class="form-group" *ngIf="output.alice">
+      <label for="room">Room Name</label>
+      <input type="text" id="room" [(ngModel)]="output.room" required />
+      <div class="error-message" *ngIf="formError">{{ formError }}</div>
+    </div>
+
     <div class="actions">
       <button class="cancel-button" (click)="cancel()">Отмена</button>
       <button class="save-button" (click)="save()">Сохранить</button>
