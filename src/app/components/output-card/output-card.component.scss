@@ -13,9 +13,33 @@
     box-shadow: 0 4px 8px var(--shadow-color-hover);
   }
 
+  .output-name {
+    font-weight: 500;
+    color: var(--text-color);
+  }
+
   .output-timer {
     font-size: 0.9em;
     color: var(--text-secondary);
+  }
+
+  .output-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .edit-button {
+      background: none;
+      border: none;
+      padding: 4px;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
   }
 
   .switch {
@@ -68,6 +92,6 @@
 // Responsive adjustments
 @media (max-width: 767px) {
   .output-card {
-    // margin-bottom: 8px;
+    padding: 12px;
   }
 }

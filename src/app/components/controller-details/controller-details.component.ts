@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {DataService} from "../../services/data.service";
 import {OutputCardComponent} from "../output-card/output-card.component";
 import {InputCardComponent} from "../input-card/input-card.component";
@@ -24,18 +24,19 @@ import {WebsocketService} from "../../services/websocket.service";
 export class ControllerDetailsComponent implements OnInit {
   controller: any;
   activeTab: 'outputs' | 'inputs' | 'buttons' = 'outputs';
-  previousTab: 'outputs' | 'inputs' | 'buttons' | null = null;
+  previousTab: 'outputs' | 'inputs' | 'buttons' = 'outputs';
   showInfoPopup: boolean = false;
 
-  private toggleSubject = new Subject<{ mac:string }>();
+  private toggleSubject = new Subject<any>();
 
   constructor(private route: ActivatedRoute,
+              private router: Router,
               private dataService: DataService,
               private websocketService: WebsocketService) {
-    this.toggleSubject.pipe(debounceTime(300)).subscribe(({ mac }) => {
+    this.toggleSubject.pipe(debounceTime(300)).subscribe((data) => {
       this.websocketService.sendMessage({
-        type: 'UPLOADCONFIG',
-        payload: {mac: mac},
+        type: 'ACTION',
+        payload: data,
       });
     });
   }
@@ -51,7 +52,6 @@ export class ControllerDetailsComponent implements OnInit {
   // }
 
   setActiveTab(tab: 'outputs' | 'inputs' | 'buttons') {
-    if (tab === this.activeTab) return;
     this.previousTab = this.activeTab;
     this.activeTab = tab;
   }
@@ -73,8 +73,8 @@ export class ControllerDetailsComponent implements OnInit {
       case 'outputs': return 0;
       case 'inputs': return 1;
       case 'buttons': return 2;
-      default: return 0;
     }
+    return 0;
   }
 
   compare( a: any, b: any ) {
@@ -88,13 +88,11 @@ export class ControllerDetailsComponent implements OnInit {
   }
 
   findInputs(input: any[] | null | undefined): any[] {
-    if (!input) return [];
-    return input.filter(p => p.id <= 15);
+    return input?.filter(p => p.id <= 15) || [];
   }
 
   findButtons(input: any[] | null | undefined): any[] {
-    if (!input) return [];
-    return input.filter(p => p.id > 15);
+    return input?.filter(p => p.id > 15) || [];
   }
 
   ngOnInit() {
@@ -103,23 +101,32 @@ export class ControllerDetailsComponent implements OnInit {
       this.dataService.getControllerByMacWithFetch(mac).subscribe((controller) => {
         this.controller = controller;
         if (this.controller?.outputs) {
-          this.controller.outputs.sort(this.compare);
+          this.controller.outputs.sort((a: any, b: any) => {
+            if (a.slaveId !== b.slaveId) {
+              return a.slaveId - b.slaveId;
+            }
+            return a.id - b.id;
+          });
         }
       });
     }
   }
 
   upload() {
-    console.log('upload')
-    this.toggleSubject.next( {mac: this.controller.mac });
+    this.toggleSubject.next({ mac: this.controller.mac });
   }
 
   test() {
-    this.toggleSubject.next( {mac: "test" });
+    this.toggleSubject.next({ mac: "test" });
   }
 
   showInfo(): void {
     this.showInfoPopup = true;
   }
 
+  onEditOutput(output: any) {
+    this.router.navigate(['/output-edit'], { 
+      state: { output } 
+    });
+  }
 }
