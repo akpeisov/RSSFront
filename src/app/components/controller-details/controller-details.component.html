@@ -34,7 +34,8 @@
     <div class="outputs-container">
       <app-output-card *ngFor="let output of controller?.outputs" 
                        [output]="output" 
-                       [mac]="controller?.mac">
+                       [mac]="controller?.mac"
+                       (edit)="onEditOutput($event)">
       </app-output-card>
     </div>
 
@@ -66,7 +67,8 @@
       <div class="outputs-container">
         <app-output-card *ngFor="let output of controller?.outputs" 
                          [output]="output" 
-                         [mac]="controller?.mac">
+                         [mac]="controller?.mac"
+                         (edit)="onEditOutput($event)">
         </app-output-card>
       </div>
     </div>
