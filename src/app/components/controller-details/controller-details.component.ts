@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {DataService} from "../../services/data.service";
 import {OutputCardComponent} from "../output-card/output-card.component";
 import {InputCardComponent} from "../input-card/input-card.component";
 import {NgFor, NgClass, NgIf} from "@angular/common";
 import {ButtonCardComponent} from "../button-card/button-card.component";
-import {debounceTime, Subject} from "rxjs";
+import {debounceTime, Subject, Subscription} from "rxjs";
 import {WebsocketService} from "../../services/websocket.service";
+import {filter} from "rxjs/operators";
 
 @Component({
   selector: 'app-controller-details',
@@ -21,13 +22,14 @@ import {WebsocketService} from "../../services/websocket.service";
     ButtonCardComponent
   ]
 })
-export class ControllerDetailsComponent implements OnInit {
+export class ControllerDetailsComponent implements OnInit, OnDestroy {
   controller: any;
   activeTab: 'outputs' | 'inputs' | 'buttons' = 'outputs';
   previousTab: 'outputs' | 'inputs' | 'buttons' = 'outputs';
   showInfoPopup: boolean = false;
 
   private toggleSubject = new Subject<any>();
+  private websocketSubscription: Subscription | null = null;
 
   constructor(private route: ActivatedRoute,
               private router: Router,
@@ -108,7 +110,37 @@ export class ControllerDetailsComponent implements OnInit {
             return a.id - b.id;
           });
         }
+        
+        // Set up WebSocket subscription after controller is loaded
+        this.setupWebSocketSubscription();
       });
+    }
+  }
+
+  private setupWebSocketSubscription() {
+    // Unsubscribe from previous subscription if exists
+    if (this.websocketSubscription) {
+      this.websocketSubscription.unsubscribe();
+    }
+
+    // Subscribe to WebSocket messages to update controller info
+    this.websocketSubscription = this.websocketService.messages$.pipe(
+      filter((message: any) => message.type === 'INFO' && message.payload?.mac === this.controller?.mac)
+    ).subscribe((message: any) => {
+      if (this.controller && message.payload) {
+        // Update controller info with new data
+        this.controller = {
+          ...this.controller,
+          ...message.payload
+        };
+        console.log('Controller info updated:', message.payload);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.websocketSubscription) {
+      this.websocketSubscription.unsubscribe();
     }
   }
 
