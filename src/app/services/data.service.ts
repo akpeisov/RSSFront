@@ -4,13 +4,14 @@ import {Observable, of, BehaviorSubject} from "rxjs";
 import {IUpdateOutputMsg} from "../model/update-output-msg";
 import {map, tap} from "rxjs/operators";
 import { IWSMsg } from '../model/ws-mgs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DataService {
   private controllers: any[] = [];
-  private apiUrl = 'https://api.akpeisov.kz/webapi/userDevices';
+  private apiUrl = environment.apiUrl + '/webapi/userDevices';
   private dataSubject = new BehaviorSubject<IWSMsg | null>(null);
   data$ = this.dataSubject.asObservable();
 

@@ -27,6 +27,7 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   activeTab: 'outputs' | 'inputs' | 'buttons' = 'outputs';
   previousTab: 'outputs' | 'inputs' | 'buttons' = 'outputs';
   showInfoPopup: boolean = false;
+  showServicePopup: boolean = false;
 
   private toggleSubject = new Subject<any>();
   private websocketSubscription: Subscription | null = null;
@@ -35,11 +36,16 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
               private router: Router,
               private dataService: DataService,
               private websocketService: WebsocketService) {
-    this.toggleSubject.pipe(debounceTime(300)).subscribe((data) => {
-      this.websocketService.sendMessage({
-        type: 'ACTION',
-        payload: data,
-      });
+    this.toggleSubject.pipe(debounceTime(300)).subscribe((command) => {
+      if (this.controller?.mac) {
+        this.websocketService.sendMessage({
+          type: 'COMMAND',
+          payload: {
+            command: command,
+            mac: this.controller.mac
+          }
+        });
+      }
     });
   }
 
@@ -90,7 +96,7 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   }
 
   findInputs(input: any[] | null | undefined): any[] {
-    return input?.filter(p => p.id <= 15) || [];
+    return input?.filter(p => p.id <= 15).filter(p => p.slaveId == 0 || p.slaveId == null) || [];
   }
 
   findButtons(input: any[] | null | undefined): any[] {
@@ -145,15 +151,12 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   }
 
   upload() {
-    this.toggleSubject.next({ mac: this.controller.mac });
-  }
-
-  test() {
-    this.toggleSubject.next({ mac: "test" });
+    this.toggleSubject.next('UPLOADCONFIG');
   }
 
   showInfo(): void {
     this.showInfoPopup = true;
+    this.toggleSubject.next('INFO');
   }
 
   onEditOutput(output: any) {
@@ -161,4 +164,29 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
       state: { output } 
     });
   }
+
+  showService() {
+    this.showServicePopup = true;    
+  }
+
+  reboot() {
+    this.toggleSubject.next('REBOOT');
+  }
+
+  showLogs() {
+    //this.toggleSubject.next('SHOWLOGS');
+  }
+
+  enableSendLogs() {
+    this.toggleSubject.next('ENABLESENDLOGS');
+  }
+
+  disableSendLogs() {
+    this.toggleSubject.next('DISABLESENDLOGS');
+  }
+
+  startOTA() {
+    this.toggleSubject.next('STARTOTA');
+  }
+  
 }

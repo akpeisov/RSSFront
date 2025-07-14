@@ -10,7 +10,7 @@
       <div class="action-buttons">
         <button (click)="showInfo()">Info</button>
         <button (click)="upload()">Upload to controller</button>
-        <button (click)="test()">Test</button>
+        <button (click)="showService()">Service</button>
       </div>
     </div>
   </div>
@@ -125,6 +125,26 @@
           <p><span>Ethernet IP</span> <span>{{ controller?.ethIP }}</span></p>
           <p><span>WiFi IP</span> <span>{{ controller?.wifiIP }}</span></p>
           <p><span>WiFi RSSI</span> <span>{{ controller?.wifiRSSI }}</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="popup-overlay" *ngIf="showServicePopup" (click)="showServicePopup = false">
+    <div class="popup-content" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>Controller Service</h3>
+        <button class="close-button" (click)="showServicePopup = false">
+          <img src="assets/icons/close.svg" width="20" height="20" alt="Close" />
+        </button>
+      </div>
+      <div class="popup-body">
+        <div class="status-info">
+          <p><span>Reboot</span> <button (click)="reboot()">Reboot</button></p>
+          <p><span>Logs</span> <button (click)="showLogs()">Show Logs</button></p>
+          <p><span>Enable Send Logs</span> <button (click)="enableSendLogs()">Enable</button></p>
+          <p><span>Disable Send Logs</span> <button (click)="disableSendLogs()">Disable</button></p>
+          <p><span>Start OTA</span> <button (click)="startOTA()">Start</button></p>
         </div>
       </div>
     </div>

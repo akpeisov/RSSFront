@@ -5,12 +5,13 @@ import { ErrorService } from './error.service';
 import { KeycloakService } from 'keycloak-angular';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { IHelloMsg } from '../model/hello-msg';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class WebsocketService {
-  wsUrl = 'wss://api.akpeisov.kz/ws';
+  wsUrl = environment.wsUrl;
   private ws: WebSocketSubject<any> | any;
   private myHello: IHelloMsg | any = {
     type: '',

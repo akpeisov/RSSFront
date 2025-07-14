@@ -19,13 +19,13 @@ export class OutputCardComponent {
   @Input() mac: any;
   @Output() edit = new EventEmitter<any>();
 
-  private toggleSubject = new Subject<{ output: number, action: string }>();
+  private toggleSubject = new Subject<{ output: number, action: string, slaveId: number }>();
 
   constructor(private websocketService: WebsocketService) {
-    this.toggleSubject.pipe(debounceTime(300)).subscribe(({ output, action }) => {
+    this.toggleSubject.pipe(debounceTime(300)).subscribe(({ output, action, slaveId }) => {
       this.websocketService.sendMessage({
         type: 'ACTION',
-        payload: { mac: this.mac, output, action },
+        payload: { mac: this.mac, output, action, slaveId },
       });
     });
   }
@@ -33,7 +33,7 @@ export class OutputCardComponent {
   onChange($event: Event): void {
     const newValue = ($event.target as HTMLInputElement).checked;
     //console.log("changed ", newValue)
-    this.toggleSubject.next({ output: this.output.id, action: newValue ? "on" : "off" });
+    this.toggleSubject.next({ output: this.output.id, action: newValue ? "on" : "off", slaveId: this.output.slaveId });
   }
 
   onEdit(): void {

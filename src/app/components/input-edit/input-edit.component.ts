@@ -137,6 +137,7 @@ export class InputEditComponent implements OnInit {
   onOutputChange(action: any): void {
     const selectedOutput = this.outputs.find(o => o.outputID === action.outputID);
     action.output = selectedOutput?.id || null;
+    action.slaveId = selectedOutput?.slaveId || 0;
   }
 
   removeAction(eventIndex: number, actionIndex: number): void {

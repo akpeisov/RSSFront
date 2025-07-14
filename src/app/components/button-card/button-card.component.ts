@@ -63,7 +63,7 @@ export class ButtonCardComponent {
       clearTimeout(this.holdTimeout);
       clearInterval(this.progressInterval);
       if (this.progress < 100) {
-        this.sendAction('on');
+        this.sendAction('toggle');
       }
       this.isHolding = false;
       this.progress = 0;
@@ -72,7 +72,7 @@ export class ButtonCardComponent {
 
   sendAction(action: string): void {
     this.toggleSubject.next({
-      input: this.input.id,
+      input: this.input.id,      
       action
     });
   }
