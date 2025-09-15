@@ -14,11 +14,3 @@ export const routes: Routes = [
   { path: 'linkcontroller/:mac', component: LinkControllerComponent },
   { path: 'output-edit', component: OutputEditComponent },
 ];
-
-
-
-// @NgModule({
-//   imports: [RouterModule.forRoot(routes)],
-//   exports: [RouterModule],
-// })
-// export class AppRoutingModule {}

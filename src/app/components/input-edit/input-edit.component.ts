@@ -49,7 +49,7 @@ export class InputEditComponent implements OnInit {
       this.dataService.getInputByUuid(uuid).subscribe((input) => {
         this.input = input;
         this.controllerMac = input.mac;
-        console.log('input-edit', this.input);
+        console.log('input-edit', this.input);                
       });
 
       this.dataService.getOutputsByInputUuid(uuid).subscribe((outputs) => {
@@ -61,10 +61,11 @@ export class InputEditComponent implements OnInit {
 
   getActions(type: string): string[] {
     switch (type) {
+      case 'BTN':
+        return ['toggle', 'longpress'];
       case 'SW':
         return ['on', 'off'];
       case 'INVSW':
-      case 'BTN':
         return ['toggle'];
       default:
         return [];
@@ -77,30 +78,30 @@ export class InputEditComponent implements OnInit {
       // For INVSW, ensure there's only one event with 'toggle'
       this.input.events = [{
         event: 'toggle',
-        actions: this.input.events[0]?.actions || []
+        actions: this.input.events?.find((e: { event: string }) => e.event === 'toggle')?.actions || []
       }];
     } else if (this.input.type === 'SW') {
       // For SW, ensure there are 'on' and 'off' events
       this.input.events = [
         {
           event: 'on',
-          actions: this.input.events.find((e: { event: string }) => e.event === 'on')?.actions || []
+          actions: this.input.events?.find((e: { event: string }) => e.event === 'on')?.actions || []
         },
         {
           event: 'off',
-          actions: this.input.events.find((e: { event: string }) => e.event === 'off')?.actions || []
+          actions: this.input.events?.find((e: { event: string }) => e.event === 'off')?.actions || []
         }
       ];
     } else if (this.input.type === 'BTN') {
-      // For BTN, ensure there are 'press' and 'long press' events
+      // For BTN, ensure there are 'toggle' and 'longpress' events
       this.input.events = [
         {
-          event: 'press',
-          actions: this.input.events.find((e: { event: string }) => e.event === 'press')?.actions || []
+          event: 'toggle',
+          actions: this.input.events?.find((e: { event: string }) => e.event === 'toggle')?.actions || []
         },
         {
-          event: 'long press',
-          actions: this.input.events.find((e: { event: string }) => e.event === 'long press')?.actions || []
+          event: 'longpress',
+          actions: this.input.events?.find((e: { event: string }) => e.event === 'longpress')?.actions || []
         }
       ];
     }

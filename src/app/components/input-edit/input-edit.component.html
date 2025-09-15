@@ -70,10 +70,10 @@
 
               <div class="form-group">
                 <label>Action</label>
-                <select [(ngModel)]="action.action" [disabled]="input.type === 'INVSW'">
-                  <option value="on" *ngIf="input.type !== 'INVSW'">On</option>
-                  <option value="off" *ngIf="input.type !== 'INVSW'">Off</option>
-                  <option value="toggle">Toggle</option>
+                <select [(ngModel)]="action.action">
+                  <option value="on" *ngIf="input.type === 'SW'">On</option>
+                  <option value="off" *ngIf="input.type === 'SW'">Off</option>
+                  <option value="toggle" *ngIf="input.type === 'BTN' || input.type === 'INVSW'">Toggle</option>
                 </select>
               </div>
             </div>

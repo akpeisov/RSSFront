@@ -3,11 +3,24 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {DataService} from "../../services/data.service";
 import {OutputCardComponent} from "../output-card/output-card.component";
 import {InputCardComponent} from "../input-card/input-card.component";
-import {NgFor, NgClass, NgIf} from "@angular/common";
+import {NgFor, NgClass, NgIf, KeyValuePipe} from "@angular/common";
+import {FormsModule} from "@angular/forms";
 import {ButtonCardComponent} from "../button-card/button-card.component";
 import {debounceTime, Subject, Subscription} from "rxjs";
 import {WebsocketService} from "../../services/websocket.service";
 import {filter} from "rxjs/operators";
+import { AnsiColorPipe } from '../shared/ansi-color/ansi-color.pipe';
+
+interface ModbusConfig {
+  mode: 'none' | 'master' | 'slave';
+  pollingTime?: number;
+  readTimeout?: number;
+  maxRetries?: number;
+  actionOnSameSlave?: boolean;
+  slaveId?: number;
+  master?: string;
+  mac?: string;
+}
 
 @Component({
   selector: 'app-controller-details',
@@ -19,7 +32,10 @@ import {filter} from "rxjs/operators";
     NgFor, 
     NgClass,
     NgIf,
-    ButtonCardComponent
+    KeyValuePipe,
+    FormsModule,
+    ButtonCardComponent,
+    AnsiColorPipe
   ]
 })
 export class ControllerDetailsComponent implements OnInit, OnDestroy {
@@ -28,9 +44,22 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   previousTab: 'outputs' | 'inputs' | 'buttons' = 'outputs';
   showInfoPopup: boolean = false;
   showServicePopup: boolean = false;
+  showLogsPanel: boolean = false;
+  logs: string[] = [];
+  //logsText: string = '';
+  settingsMenuOpen = false;
+  showModbusPanel = false;
+  showSchedulerPanel = false;
+  showNetworkPanel = false;
+  showRebootConfirm = false;
+  showUpdateConfirm = false;
+  showUploadConfirm = false;
+  modbusConfig: ModbusConfig = { mode: 'none' };
+  availableMaster: any[] = [];
 
   private toggleSubject = new Subject<any>();
   private websocketSubscription: Subscription | null = null;
+  public formError: string = '';
 
   constructor(private route: ActivatedRoute,
               private router: Router,
@@ -96,11 +125,47 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   }
 
   findInputs(input: any[] | null | undefined): any[] {
-    return input?.filter(p => p.id <= 15).filter(p => p.slaveId == 0 || p.slaveId == null) || [];
+    //return input?.filter(p => p.id <= 15).filter(p => p.slaveId == 0 || p.slaveId == null) || [];
+    return input?.filter(p => p.id <= 15) || [];
   }
 
   findButtons(input: any[] | null | undefined): any[] {
     return input?.filter(p => p.id > 15) || [];
+  }
+
+  getOutputsBySlaveId(): { [key: string]: any[] } {
+    if (!this.controller?.io.outputs) return {};
+    
+    const grouped: { [key: string]: any[] } = {};
+    
+    this.controller.io.outputs.forEach((output: any) => {
+      const slaveId = output.slaveId === null || output.slaveId === undefined ? '0' : output.slaveId.toString();
+      if (!grouped[slaveId]) {
+        grouped[slaveId] = [];
+      }
+      grouped[slaveId].push(output);
+    });
+    
+    return grouped;
+  }
+
+  getInputsBySlaveId(): { [key: string]: any[] } {
+    if (!this.controller?.io.inputs) return {};
+    
+    const grouped: { [key: string]: any[] } = {};
+    
+    // Используем фильтрацию findInputs (id <= 15)
+    const inputs = this.findInputs(this.controller.io.inputs);
+    
+    inputs.forEach((input: any) => {
+      const slaveId = input.slaveId === null || input.slaveId === undefined ? '0' : input.slaveId.toString();
+      if (!grouped[slaveId]) {
+        grouped[slaveId] = [];
+      }
+      grouped[slaveId].push(input);
+    });
+    
+    return grouped;
   }
 
   ngOnInit() {
@@ -108,8 +173,8 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
     if (mac) {
       this.dataService.getControllerByMacWithFetch(mac).subscribe((controller) => {
         this.controller = controller;
-        if (this.controller?.outputs) {
-          this.controller.outputs.sort((a: any, b: any) => {
+        if (this.controller?.io.outputs) {
+          this.controller.io.outputs.sort((a: any, b: any) => {
             if (a.slaveId !== b.slaveId) {
               return a.slaveId - b.slaveId;
             }
@@ -131,15 +196,29 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
 
     // Subscribe to WebSocket messages to update controller info
     this.websocketSubscription = this.websocketService.messages$.pipe(
-      filter((message: any) => message.type === 'INFO' && message.payload?.mac === this.controller?.mac)
+      filter((message: any) =>
+        (message.type === 'INFO' && message.payload?.mac === this.controller?.mac) ||
+        (message.type === 'LOG') || (message.type === 'SUCCESS')
+      )
     ).subscribe((message: any) => {
-      if (this.controller && message.payload) {
+      console.log('Controller-details ', message);
+      if (message.type === 'INFO' && this.controller && message.payload) {
         // Update controller info with new data
         this.controller = {
           ...this.controller,
           ...message.payload
         };
         console.log('Controller info updated:', message.payload);
+      }
+      if (message.type === 'LOG' && message.payload) {
+        const newLines = Array.isArray(message.payload)
+          ? "test"//message.payload
+          : String(message.payload.replace('\n', '') ).split('\n');
+        this.logs = [...this.logs, ...newLines];
+      }
+      if (message.type === 'SUCCESS') {
+        if (this.showUploadConfirm)
+          this.showUploadConfirm = false;        
       }
     });
   }
@@ -150,7 +229,7 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  upload() {
+  confirmUpload() {
     this.toggleSubject.next('UPLOADCONFIG');
   }
 
@@ -174,9 +253,9 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   }
 
   showLogs() {
-    //this.toggleSubject.next('SHOWLOGS');
+    this.showLogsPanel = true;    
   }
-
+  
   enableSendLogs() {
     this.toggleSubject.next('ENABLESENDLOGS');
   }
@@ -188,5 +267,122 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   startOTA() {
     this.toggleSubject.next('STARTOTA');
   }
+
+  get logsText(): string {
+    return Array.isArray(this.logs) ? this.logs.join('\n') : String(this.logs);
+  }
   
+  toggleSettingsMenu(event: Event) {
+    event.stopPropagation();
+    this.settingsMenuOpen = !this.settingsMenuOpen;
+  }
+
+  onMenuInfo() {
+    this.settingsMenuOpen = false;
+    this.showInfo();
+  }
+
+  onMenuReboot() {
+    this.settingsMenuOpen = false;
+    this.showRebootConfirm = true;
+  }
+
+  onMenuUpdate() {
+    this.settingsMenuOpen = false;
+    this.showUpdateConfirm = true;
+  }
+
+  onMenuLogs() {
+    this.settingsMenuOpen = false;
+    this.showLogs();
+  }
+
+  onMenuModbus() {
+    this.settingsMenuOpen = false;
+    this.initModbusConfig();
+    this.showModbusPanel = true;
+  }
+
+  initModbusConfig() {
+    // Получаем список контроллеров, кроме текущего
+    this.availableMaster = (this.dataService.controllers || []).filter((ctrl: any) => ctrl.mac !== this.controller?.mac && ctrl.modbus?.mode != 'slave');
+    // Копируем текущую конфигурацию modbus или создаем дефолтную
+    this.modbusConfig = this.controller?.modbus || {mode: 'none'};
+    if (this.modbusConfig == null || this.modbusConfig.mode == null) {
+      this.modbusConfig.mode = 'none';
+    }    
+    if (this.modbusConfig.mode === 'master') {
+      if (this.modbusConfig.actionOnSameSlave == null) {
+        this.modbusConfig.actionOnSameSlave = false;      
+      }
+      if (this.modbusConfig.pollingTime == null) {
+        this.modbusConfig.pollingTime = 100;
+      }
+      if (this.modbusConfig.readTimeout == null) {
+        this.modbusConfig.readTimeout = 200;
+      }
+      if (this.modbusConfig.maxRetries == null) {
+        this.modbusConfig.maxRetries = 3;      
+      }
+    }
+  }
+  
+  saveModbusConfig() {
+    this.formError = '';
+    if (this.modbusConfig.mode === 'master') {
+      if (this.modbusConfig.maxRetries == null || this.modbusConfig.maxRetries > 5 || this.modbusConfig.maxRetries < 0) {
+        this.formError = 'maxRetries must be in 0..5';
+        return;
+      }
+      if (this.modbusConfig.pollingTime == null || this.modbusConfig.pollingTime > 5000 || this.modbusConfig.pollingTime < 100) {
+        this.formError = 'pollingTime must be in 100..5000';
+        return;
+      }
+      if (this.modbusConfig.readTimeout == null || this.modbusConfig.readTimeout > 1000 || this.modbusConfig.readTimeout < 50) {
+        this.formError = 'readTimeout must be in 50..1000';
+        return;
+      }
+    } else if (this.modbusConfig.mode === 'slave') {
+      if (this.modbusConfig.slaveId == null || this.modbusConfig.slaveId < 1 || this.modbusConfig.slaveId > 250) {
+        this.formError = 'slaveId must be in 1..250';
+        return;
+      }
+      if (this.modbusConfig.master == null) {
+        this.formError = 'master controller must be chosen';
+        return;
+      }
+    }
+    this.modbusConfig.mac = this.controller.mac;
+    this.websocketService.sendMessage({
+      type: 'SETMODBUSCONFIG',
+      payload: this.modbusConfig
+    });
+    this.showModbusPanel = false;
+  }
+
+  onMenuScheduler() {
+    this.settingsMenuOpen = false;
+    this.showSchedulerPanel = true;
+  }
+
+  onMenuNetwork() {
+    this.settingsMenuOpen = false;
+    this.showNetworkPanel = true;
+  }
+
+  confirmReboot() {
+    this.showRebootConfirm = false;
+    this.reboot();
+  }
+
+  confirmUpdate() {
+    this.showUpdateConfirm = false;
+    this.startOTA();
+  }
+
+  cancelDialog() {
+    this.showRebootConfirm = false;
+    this.showUpdateConfirm = false;
+    this.showUploadConfirm = false;
+  }
 }

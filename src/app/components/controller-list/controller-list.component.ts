@@ -3,8 +3,8 @@ import {DataService} from "../../services/data.service";
 import {Router} from "@angular/router";
 import {ControllerCardComponent} from "../controller-card/controller-card.component";
 import {HttpClientModule} from "@angular/common/http";
-import {NgFor} from "@angular/common";
-
+import {NgFor, NgIf} from "@angular/common";
+import {FormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-controller-list',
@@ -13,7 +13,7 @@ import {NgFor} from "@angular/common";
   standalone: true,
   imports: [ControllerCardComponent,
     HttpClientModule,
-    NgFor
+    NgFor, NgIf
   ]
 })
 export class ControllerListComponent implements OnInit {

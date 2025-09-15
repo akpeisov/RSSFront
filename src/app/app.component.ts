@@ -214,7 +214,7 @@ export class AppComponent implements OnInit {
     //this.wsMgs = message;
     const payload = message.payload;
     if (message.type === 'UPDATE') {
-      this.dataService.updateControllerOutput(payload)
+      this.dataService.updateControllerIO(payload)
       this.updateControllerDetails(payload.mac);
     } else if (message.type === 'SUCCESS') {
       this.toastr.success(payload.message);

@@ -15,6 +15,7 @@ interface Output {
   alice: boolean;
   room?: string;
   default: 'on' | 'off';
+  slaveId?: number; // Added slaveId to the interface
 }
 
 type NumberField = 'on' | 'off' | 'limit';
@@ -65,7 +66,7 @@ export class OutputEditComponent implements OnInit {
     const state = history.state;
     if (state && state.output) {
       this.output = { ...state.output };
-      this.controllerMac = state.controllerMac;
+      this.controllerMac = state.controllerMac;      
     } else {
       this.router.navigate(['/']);
     }
