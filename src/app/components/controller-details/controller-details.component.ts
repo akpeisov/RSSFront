@@ -10,17 +10,7 @@ import {debounceTime, Subject, Subscription} from "rxjs";
 import {WebsocketService} from "../../services/websocket.service";
 import {filter} from "rxjs/operators";
 import { AnsiColorPipe } from '../shared/ansi-color/ansi-color.pipe';
-
-interface ModbusConfig {
-  mode: 'none' | 'master' | 'slave';
-  pollingTime?: number;
-  readTimeout?: number;
-  maxRetries?: number;
-  actionOnSameSlave?: boolean;
-  slaveId?: number;
-  master?: string;
-  mac?: string;
-}
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-controller-details',
@@ -35,7 +25,8 @@ interface ModbusConfig {
     KeyValuePipe,
     FormsModule,
     ButtonCardComponent,
-    AnsiColorPipe
+    AnsiColorPipe,
+    RouterModule    
   ]
 })
 export class ControllerDetailsComponent implements OnInit, OnDestroy {
@@ -46,17 +37,10 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   showServicePopup: boolean = false;
   showLogsPanel: boolean = false;
   logs: string[] = [];
-  //logsText: string = '';
   settingsMenuOpen = false;
-  showModbusPanel = false;
-  showSchedulerPanel = false;
-  showNetworkPanel = false;
   showRebootConfirm = false;
   showUpdateConfirm = false;
-  showUploadConfirm = false;
-  modbusConfig: ModbusConfig = { mode: 'none' };
-  availableMaster: any[] = [];
-
+  showUploadConfirm = false;  
   private toggleSubject = new Subject<any>();
   private websocketSubscription: Subscription | null = null;
   public formError: string = '';
@@ -77,17 +61,7 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
       }
     });
   }
-
-  // ngOnInit() {
-  //   //const controllerId = this.route.snapshot.paramMap.get('id');
-  //   // Здесь получить контроллер из сервиса/данных.
-  //   const uuid = this.route.snapshot.paramMap.get('uuid');
-  //   if (uuid) {
-  //     console.log("controller uuid", uuid)
-  //     this.controller = this.dataService.getControllerByUuid(uuid); // Извлечь данные
-  //   }
-  // }
-
+   
   setActiveTab(tab: 'outputs' | 'inputs' | 'buttons') {
     this.previousTab = this.activeTab;
     this.activeTab = tab;
@@ -295,79 +269,6 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   onMenuLogs() {
     this.settingsMenuOpen = false;
     this.showLogs();
-  }
-
-  onMenuModbus() {
-    this.settingsMenuOpen = false;
-    this.initModbusConfig();
-    this.showModbusPanel = true;
-  }
-
-  initModbusConfig() {
-    // Получаем список контроллеров, кроме текущего
-    this.availableMaster = (this.dataService.controllers || []).filter((ctrl: any) => ctrl.mac !== this.controller?.mac && ctrl.modbus?.mode != 'slave');
-    // Копируем текущую конфигурацию modbus или создаем дефолтную
-    this.modbusConfig = this.controller?.modbus || {mode: 'none'};
-    if (this.modbusConfig == null || this.modbusConfig.mode == null) {
-      this.modbusConfig.mode = 'none';
-    }    
-    if (this.modbusConfig.mode === 'master') {
-      if (this.modbusConfig.actionOnSameSlave == null) {
-        this.modbusConfig.actionOnSameSlave = false;      
-      }
-      if (this.modbusConfig.pollingTime == null) {
-        this.modbusConfig.pollingTime = 100;
-      }
-      if (this.modbusConfig.readTimeout == null) {
-        this.modbusConfig.readTimeout = 200;
-      }
-      if (this.modbusConfig.maxRetries == null) {
-        this.modbusConfig.maxRetries = 3;      
-      }
-    }
-  }
-  
-  saveModbusConfig() {
-    this.formError = '';
-    if (this.modbusConfig.mode === 'master') {
-      if (this.modbusConfig.maxRetries == null || this.modbusConfig.maxRetries > 5 || this.modbusConfig.maxRetries < 0) {
-        this.formError = 'maxRetries must be in 0..5';
-        return;
-      }
-      if (this.modbusConfig.pollingTime == null || this.modbusConfig.pollingTime > 5000 || this.modbusConfig.pollingTime < 100) {
-        this.formError = 'pollingTime must be in 100..5000';
-        return;
-      }
-      if (this.modbusConfig.readTimeout == null || this.modbusConfig.readTimeout > 1000 || this.modbusConfig.readTimeout < 50) {
-        this.formError = 'readTimeout must be in 50..1000';
-        return;
-      }
-    } else if (this.modbusConfig.mode === 'slave') {
-      if (this.modbusConfig.slaveId == null || this.modbusConfig.slaveId < 1 || this.modbusConfig.slaveId > 250) {
-        this.formError = 'slaveId must be in 1..250';
-        return;
-      }
-      if (this.modbusConfig.master == null) {
-        this.formError = 'master controller must be chosen';
-        return;
-      }
-    }
-    this.modbusConfig.mac = this.controller.mac;
-    this.websocketService.sendMessage({
-      type: 'SETMODBUSCONFIG',
-      payload: this.modbusConfig
-    });
-    this.showModbusPanel = false;
-  }
-
-  onMenuScheduler() {
-    this.settingsMenuOpen = false;
-    this.showSchedulerPanel = true;
-  }
-
-  onMenuNetwork() {
-    this.settingsMenuOpen = false;
-    this.showNetworkPanel = true;
   }
 
   confirmReboot() {

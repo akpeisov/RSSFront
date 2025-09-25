@@ -1,0 +1,109 @@
+// Ethernet row: group fields horizontally on desktop, stack on mobile
+.eth-row {
+	display: flex;
+	gap: 1rem;
+	margin-bottom: 1rem;
+	flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+	.eth-row {
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+}
+.wifi-row {
+	display: flex;	
+	gap: 1rem;	
+	margin-bottom: 1rem;
+	flex-wrap: wrap;
+}
+.wifi-row label {
+	flex: 1 1 45%;
+	min-width: 120px;
+	max-width: 48%;
+}
+@media (max-width: 700px) {
+	.wifi-row {
+		flex-direction: column;
+		gap: 0;
+	}
+	.wifi-row label {
+		min-width: 0;
+		max-width: 100%;
+		width: 100%;
+	}
+}
+/* empty file */
+
+.settings-section {
+	margin-bottom: 32px;
+	padding: 24px 18px;
+	background: var(--bg-secondary, #f7f7f7);
+	border-radius: 10px;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.settings-section h2 {
+	margin-bottom: 18px;
+	font-size: 1.25rem;
+	color: var(--text-secondary, #555);
+	font-weight: 600;
+}
+
+.settings-panel .modal-body {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.settings-panel label {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	font-size: 1rem;
+	margin-bottom: 8px;
+	gap: 4px;
+}
+
+.settings-panel input[type="text"],
+.settings-panel input[type="number"],
+.settings-panel select {
+	width: 100%;
+	padding: 8px 12px;
+	border-radius: 6px;
+	border: 1px solid var(--border-color, #ccc);
+	background: var(--bg-primary, #fff);
+	color: var(--text-color, #222);
+	font-size: 1rem;
+	margin-top: 2px;
+	box-sizing: border-box;
+	transition: border 0.2s;
+}
+
+.settings-panel input[type="text"]:focus,
+.settings-panel input[type="number"]:focus,
+.settings-panel select:focus {
+	border-color: var(--button-bg, #1976d2);
+	outline: none;
+}
+
+.settings-panel input[type="checkbox"] {
+	accent-color: var(--button-bg, #1976d2);
+	width: 18px;
+	height: 18px;
+	margin-top: 4px;
+}
+
+.error-message {
+	color: var(--error-color, #f44336);
+	font-size: 0.95rem;
+	margin-top: 4px;
+}
+
+.modal-actions {
+	display: flex;
+	gap: 16px;
+	justify-content: flex-end;
+	margin-top: 12px;
+}

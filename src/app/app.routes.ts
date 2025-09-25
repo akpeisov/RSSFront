@@ -5,11 +5,13 @@ import { ControllerDetailsComponent } from './components/controller-details/cont
 import { InputEditComponent } from "./components/input-edit/input-edit.component";
 import { LinkControllerComponent } from "./components/link-controller/link-controller.component";
 import { OutputEditComponent } from "./components/output-edit/output-edit.component";
+import { SettingsComponent } from './components/settings/settings.component';
 
 export const routes: Routes = [
   { path: '', component: ControllerListComponent },
   //{ path: 'controller/:id', component: ControllerDetailsComponent },
   { path: 'controller/:mac', component: ControllerDetailsComponent },
+  { path: 'controller/:mac/settings', component: SettingsComponent },
   { path: 'input-edit/:uuid', component: InputEditComponent },
   { path: 'linkcontroller/:mac', component: LinkControllerComponent },
   { path: 'output-edit', component: OutputEditComponent },

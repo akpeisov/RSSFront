@@ -1,10 +1,10 @@
 export const environment = {
-  production: true,
+  production: false,
   test: false,
-  apiUrl: 'https://api.akpeisov.kz',
-  wsUrl: 'wss://api.akpeisov.kz/ws',
+  apiUrl: 'http://127.0.0.1:8888',
+  wsUrl: 'ws://127.0.0.1:8888/ws',
   keycloak: {
-    url: 'https://1keycloak.akpeisov.kz',
+    url: 'http://172.20.8.62:8180',
     realm: 'RelaySmartSystems',
     clientId: 'RelaySmartSystemsFront'
   }

@@ -50,41 +50,26 @@
                 }
               ],
               "outputHashing": "all",
-              "serviceWorker": "ngsw-config.json",
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ]
-            },
-            "test": {
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.test.ts"
-                }
-              ],
-              "sourceMap": true
+              "serviceWorker": "ngsw-config.json"
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
             },
-            "dev": {
+            "dev2": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.dev.ts"
+                  "with": "src/environments/environment.dev2.ts"
                 }
-              ],
-              "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true
+              ]
             }
           },
-          "defaultConfiguration": "production"
+          "defaultConfiguration": "dev2"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -92,14 +77,11 @@
             "production": {
               "buildTarget": "RSSFront:build:production"
             },
-            "test": {
-              "buildTarget": "RSSFront:build:test"
-            },
             "development": {
               "buildTarget": "RSSFront:build:development"
             },
-            "dev": {
-              "buildTarget": "RSSFront:build:dev"
+            "dev2": {
+              "buildTarget": "RSSFront:build:dev2"
             }
           },
           "defaultConfiguration": "development"

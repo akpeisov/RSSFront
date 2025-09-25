@@ -13,18 +13,20 @@
             <img src="assets/icons/arrow-up.svg" width="28" height="28" alt="Upload" />  
           </button>
         </div>
+        <div>          
+          <button class="settings-btn" [routerLink]="['/controller', controller?.mac, 'settings']">
+            <img src="assets/icons/settings-icon.svg" width="28" height="28" alt="Settings" />  
+          </button>
+        </div>
         <div class="settings-dropdown" [class.open]="settingsMenuOpen" (mouseleave)="settingsMenuOpen = false">
           <button class="settings-btn" (click)="toggleSettingsMenu($event)">
-            <img src="assets/icons/settings-icon.svg" width="28" height="28" alt="Settings" />
+            <img src="assets/icons/settings-icon.svg" width="28" height="28" alt="Actions" />
           </button>
           <ul class="dropdown-menu" *ngIf="settingsMenuOpen">
             <li (click)="onMenuInfo()">Info</li>
             <li (click)="onMenuReboot()">Reboot</li>
             <li (click)="onMenuUpdate()">Update</li>
-            <li (click)="onMenuLogs()">Logs</li>
-            <li (click)="onMenuModbus()">Modbus</li>
-            <li (click)="onMenuScheduler()">Scheduler</li>
-            <li (click)="onMenuNetwork()">Network</li>
+            <li (click)="onMenuLogs()">Logs</li>            
           </ul>
         </div>
       </div>
@@ -218,66 +220,6 @@
     <div class="modal-actions">
       <button (click)="confirmUpdate()">Yes</button>
       <button (click)="cancelDialog()">No</button>
-    </div>
-  </div>
-</div>
-
-<!-- Панель Modbus -->
-<div class="popup-overlay" *ngIf="showModbusPanel">
-  <div class="modal-dialog modbus-panel">
-    <div class="modal-title">Modbus Settings</div>
-    <div class="modal-body">
-      <label>Mode
-        <select [(ngModel)]="modbusConfig.mode">
-          <option value="none">None</option>
-          <option value="master">Master</option>
-          <option value="slave">Slave</option>
-        </select>
-      </label>
-      
-      <div *ngIf="modbusConfig.mode === 'master'">
-        <div>
-          <label>Polling Time<input type="number" [(ngModel)]="modbusConfig.pollingTime"></label>
-          <label>Read Timeout<input type="number" [(ngModel)]="modbusConfig.readTimeout"></label>
-          <label>Max Retries<input type="number" [(ngModel)]="modbusConfig.maxRetries"></label>
-          <label>Action on same slave<input type="checkbox" [(ngModel)]="modbusConfig.actionOnSameSlave"></label>
-        </div>        
-      </div>
-      <div *ngIf="modbusConfig.mode === 'slave'">
-        <div>
-          <label>SlaveId<input type="number" [(ngModel)]="modbusConfig.slaveId"></label>
-          <label>Master
-            <select [(ngModel)]="modbusConfig.master">
-              <option *ngFor="let ctrl of availableMaster" [value]="ctrl.mac">{{ ctrl.name }}</option>
-            </select>
-          </label>
-        </div>        
-      </div>
-    </div>
-    <div class="error-message" *ngIf="formError">{{ formError }}</div>
-    <div class="modal-actions">      
-      <button (click)="saveModbusConfig()">Сохранить</button>
-      <button (click)="showModbusPanel = false">Закрыть</button>
-    </div>
-  </div>
-</div>
-
-<!-- Панель Scheduler -->
-<div class="popup-overlay" *ngIf="showSchedulerPanel">
-  <div class="modal-dialog">
-    <div class="modal-title">Scheduler (в разработке)</div>
-    <div class="modal-actions">
-      <button (click)="showSchedulerPanel = false">Закрыть</button>
-    </div>
-  </div>
-</div>
-
-<!-- Панель Network -->
-<div class="popup-overlay" *ngIf="showNetworkPanel">
-  <div class="modal-dialog">
-    <div class="modal-title">Network Settings (в разработке)</div>
-    <div class="modal-actions">
-      <button (click)="showNetworkPanel = false">Закрыть</button>
     </div>
   </div>
 </div>

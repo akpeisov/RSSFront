@@ -7,7 +7,7 @@ import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from "@ang
 import {KeycloakBearerInterceptor, KeycloakService} from "keycloak-angular";
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
-
+import { environment } from '../environments/environment';
 
 const KeycloakBearerInterceptorProvider: Provider = {
   provide: HTTP_INTERCEPTORS,
@@ -45,7 +45,7 @@ function initializeKeycloak(keycloak: KeycloakService) {
     keycloak.init({
       // Configuration details for Keycloak
       config: {
-        url: 'https://keycloak.akpeisov.kz',
+        url: environment.keycloak.url,
         realm: 'RelaySmartSystems',
         clientId: 'RelaySmartSystemsFront',
       },

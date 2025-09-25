@@ -1,3 +1,110 @@
+/* Network panel section grid */
+.network-panel .network-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 32px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  padding-bottom: 12px;
+}
+
+.network-panel .network-section:last-child {
+  border-bottom: none;
+}
+
+.network-panel .network-section label {
+  flex: 1 1 45%;
+  min-width: 220px;
+  max-width: 48%;
+}
+
+@media (max-width: 700px) {
+  .network-panel .network-section {
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 8px;
+  }
+  .network-panel .network-section label {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+}
+/* Network panel improvements for mobile and desktop */
+.network-panel .modal-dialog {
+  width: 100%;
+  max-width: 700px;
+  min-width: 320px;
+  align-items: stretch;
+}
+
+.network-panel .modal-body {
+  max-height: 90vh;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+@media (max-width: 600px) {
+  .network-panel .modal-dialog {
+    max-width: 98vw;
+    min-width: 0;
+    padding: 12px 4px;
+  }
+  .network-panel .modal-body {
+    max-height: 80vh;
+    padding-right: 0;
+  }
+}
+/* Network panel styles */
+.network-panel .modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.network-panel label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 1rem;
+  margin-bottom: 8px;
+  gap: 4px;
+}
+
+.network-panel input[type="text"],
+.network-panel input[type="number"] {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #ccc);
+  background: var(--bg-primary, #f7f7f7);
+  color: var(--text-color, #222);
+  font-size: 1rem;
+  margin-top: 2px;
+  box-sizing: border-box;
+  transition: border 0.2s;
+}
+
+.network-panel input[type="text"]:focus,
+.network-panel input[type="number"]:focus {
+  border-color: var(--button-bg, #1976d2);
+  outline: none;
+}
+
+.network-panel input[type="checkbox"] {
+  accent-color: var(--button-bg, #1976d2);
+  width: 18px;
+  height: 18px;
+  margin-top: 4px;
+}
+
+.network-panel h4 {
+  margin-top: 18px;
+  margin-bottom: 6px;
+  font-size: 1.08rem;
+  color: var(--text-secondary, #555);
+  font-weight: 500;
+}
 /* controller-details.component.scss */
 .controller-details {
   background-color: var(--bg-primary);
