@@ -13,6 +13,7 @@ import { environment } from '../../environments/environment';
 export class WebsocketService {
   wsUrl = environment.wsUrl;
   private ws: WebSocketSubject<any> | any;
+  private isConnecting: boolean = false;
   private myHello: IHelloMsg | any = {
     type: '',
     payload: {
@@ -108,6 +109,15 @@ export class WebsocketService {
   }
 
   public connect(): void {
+    if (this.isConnecting) {
+      console.log('Already connecting, skip.');
+      return;
+    }
+    if (this.ws && !this.ws.closed) {
+      console.log('WebSocket already connected.');
+      return;
+    }
+    this.isConnecting = true;
     console.log('WS connecting to:', this.wsUrl);
 
     if (this.ws) {
@@ -120,12 +130,18 @@ export class WebsocketService {
       openObserver: {
         next: (event: Event) => {
           console.log('WebSocket connection opened:', event);
+          this.isConnecting = false;
           this.sendHelloMessage();
         },
       },
       closeObserver: {
         next: () => {
           console.log('WebSocket connection closed, attempting reconnect in 5s');
+          this.isConnecting = false;
+          if (this.ws) {
+            this.ws.complete();
+            this.ws = null;
+          }
           setTimeout(() => this.connect(), 5000);
         },
       }
@@ -138,7 +154,6 @@ export class WebsocketService {
         return EMPTY;
       })
     );
-    
     this.messagesSubject$.next(wsMessages$);
   }
 
@@ -148,6 +163,8 @@ export class WebsocketService {
     }
     if (this.ws) {
       this.ws.complete();
+      this.ws = null;
     }
+    this.isConnecting = false;
   }
 }

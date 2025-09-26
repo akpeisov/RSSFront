@@ -178,7 +178,12 @@ Test mac {{mac}} {{config?.mac}}
               <input type="number" [(ngModel)]="task.grace">
             </label>
             <label>Время
-              <input type="text" [value]="(task.time !== undefined ? ((task.time/60) | number:'2.0-0')+':' + ((task.time%60)<10 ? '0'+(task.time%60) : (task.time%60)) : '')" (change)="updateTaskTime(task, $event.target.value)" pattern="^([01]?\d|2[0-3]):[0-5]\d$" style="width:70px;">
+              <input type="time"
+                [value]="(task.time !== undefined ? ((task.time/60) | number:'2.0-0')+':' + ((task.time%60)<10 ? '0'+(task.time%60) : (task.time%60)) : '')"
+                (change)="updateTaskTime(task, $any($event.target).value)"
+                style="width:90px;"
+                title="Выберите время"
+              >
             </label>
             <label>Done
               <input type="checkbox" [(ngModel)]="task.done">
