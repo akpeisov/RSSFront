@@ -49,30 +49,43 @@ export class InputEditComponent implements OnInit {
       this.dataService.getInputByUuid(uuid).subscribe((input) => {
         this.input = input;
         this.controllerMac = input.mac;
-        console.log('input-edit', this.input);                
+        this.updateEvents();
+        //console.log('input-edit', this.input);                
       });
 
       this.dataService.getOutputsByInputUuid(uuid).subscribe((outputs) => {
         this.outputs = outputs;
-        console.log('outputs', this.outputs);
+        //console.log('outputs', this.outputs);
       });
     }
-  }
-
-  getActions(type: string): string[] {
-    switch (type) {
-      case 'BTN':
-        return ['toggle', 'longpress'];
-      case 'SW':
-        return ['on', 'off'];
-      case 'INVSW':
-        return ['toggle'];
-      default:
-        return [];
-    }
+    //this.updateEvents();
   }
 
   updateEvents(): void {
+    // Для INVSW: только toggle
+    if (this.input.type === 'INVSW') {
+      const toggleActions = this.input.events?.find((e: { event: string }) => e.event === 'toggle')?.actions || [];
+      this.input.events = [{ event: 'toggle', actions: toggleActions }];
+    } else if (this.input.type === 'SW') {
+      // Для SW: on и off
+      let onActions = this.input.events?.find((e: { event: string }) => e.event === 'on')?.actions || [];
+      let offActions = this.input.events?.find((e: { event: string }) => e.event === 'off')?.actions || [];
+      this.input.events = [
+        { event: 'on', actions: onActions },
+        { event: 'off', actions: offActions }
+      ];
+    } else if (this.input.type === 'BTN') {
+      // Для BTN: toggle и longpress
+      let toggleActions = this.input.events?.find((e: { event: string }) => e.event === 'toggle')?.actions || [];
+      let longpressActions = this.input.events?.find((e: { event: string }) => e.event === 'longpress')?.actions || [];
+      this.input.events = [
+        { event: 'toggle', actions: toggleActions },
+        { event: 'longpress', actions: longpressActions }
+      ];
+    }
+  }
+
+  updateEvents2(): void {
     // Update events based on input type
     if (this.input.type === 'INVSW') {
       // For INVSW, ensure there's only one event with 'toggle'
@@ -214,14 +227,7 @@ export class InputEditComponent implements OnInit {
   save(): void {
     console.log('Saving data:', this.input);
     this.toggleSubject.next({ payload: this.input });
-    this.animationService.triggerLeaveAnimation();
-    setTimeout(() => {
-      if (this.controllerMac) {
-        this.router.navigate(['/controller', this.controllerMac]);
-      } else {
-        this.location.back();
-      }
-    }, 150); // Half the animation duration for smoother transition
+    this.back();
   }
 
   back(): void {

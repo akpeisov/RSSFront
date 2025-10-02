@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import {DataService} from "../../services/data.service";
 import {OutputCardComponent} from "../output-card/output-card.component";
 import {InputCardComponent} from "../input-card/input-card.component";
@@ -30,6 +30,7 @@ import { RouterModule } from '@angular/router';
   ]
 })
 export class ControllerDetailsComponent implements OnInit, OnDestroy {
+  private navigationSubscription: Subscription | null = null;
   controller: any;
   activeTab: 'outputs' | 'inputs' | 'buttons' = 'outputs';
   previousTab: 'outputs' | 'inputs' | 'buttons' = 'outputs';
@@ -145,21 +146,28 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const mac = this.route.snapshot.paramMap.get('mac');
     if (mac) {
-      this.dataService.getControllerByMacWithFetch(mac).subscribe((controller) => {
-        this.controller = controller;
-        if (this.controller?.io.outputs) {
-          this.controller.io.outputs.sort((a: any, b: any) => {
-            if (a.slaveId !== b.slaveId) {
-              return a.slaveId - b.slaveId;
-            }
-            return a.id - b.id;
-          });
+      this.loadController(mac);
+      this.navigationSubscription = this.router.events.subscribe(event => {
+        if (event instanceof NavigationEnd) {
+          this.loadController(mac);
         }
-        
-        // Set up WebSocket subscription after controller is loaded
-        this.setupWebSocketSubscription();
       });
     }
+  }
+
+  private loadController(mac: string) {
+    this.dataService.getControllerByMacWithFetch(mac).subscribe((controller) => {
+      this.controller = controller;
+      if (this.controller?.io.outputs) {
+        this.controller.io.outputs.sort((a: any, b: any) => {
+          if (a.slaveId !== b.slaveId) {
+            return a.slaveId - b.slaveId;
+          }
+          return a.id - b.id;
+        });
+      }
+      this.setupWebSocketSubscription();
+    });
   }
 
   private setupWebSocketSubscription() {
@@ -200,6 +208,9 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.websocketSubscription) {
       this.websocketSubscription.unsubscribe();
+    }
+    if (this.navigationSubscription) {
+      this.navigationSubscription.unsubscribe();
     }
   }
 

@@ -5,18 +5,7 @@ import { Router } from '@angular/router';
 import { AnimationService } from '../../services/animation.service';
 import { WebsocketService } from '../../services/websocket.service';
 import { debounceTime, Subject } from 'rxjs';
-
-interface Output {
-  name: string;
-  type: 's' | 't';
-  on?: number;
-  off?: number;
-  limit?: number;
-  alice: boolean;
-  room?: string;
-  default: 'on' | 'off';
-  slaveId?: number; // Added slaveId to the interface
-}
+import { Output } from '../../model/io-config';
 
 type NumberField = 'on' | 'off' | 'limit';
 
@@ -29,10 +18,13 @@ type NumberField = 'on' | 'off' | 'limit';
 })
 export class OutputEditComponent implements OnInit {
   public output: Output = {
+    id: 0,
     name: '',
     type: 's',
     alice: false,
-    default: 'off'
+    default: 'off',
+    state: 'off',
+    slaveId: 0
   };
   public controllerMac: string = '';
   public outputTypes = [
@@ -114,22 +106,12 @@ export class OutputEditComponent implements OnInit {
 
     console.log('Saving output:', this.output);
     this.updateSubject.next({ 
-      payload: {
-        ...this.output,
-        mac: this.controllerMac
-      }
+      payload: this.output      
     });
-    this.animationService.triggerLeaveAnimation();
-    setTimeout(() => {
-      if (this.controllerMac) {
-        this.router.navigate(['/controller', this.controllerMac]);
-      } else {
-        this.location.back();
-      }
-    }, 150); // Half the animation duration for smoother transition
+    this.back();
   }
 
-  public cancel(): void {
+  public back(): void {
     this.animationService.triggerLeaveAnimation();
     setTimeout(() => {
       if (this.controllerMac) {

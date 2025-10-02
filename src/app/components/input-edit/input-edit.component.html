@@ -9,6 +9,9 @@
   <div class="input-edit-form">
     <div class="basic-settings">
       <div class="form-group">
+      <label for="name">Input Id {{input.id}}<span *ngIf="input.slaveId >0"> Slave Id {{input.slaveId}}</span></label>      
+      </div>
+      <div class="form-group">
         <label for="name">Input Name</label>
         <input id="name" type="text" [(ngModel)]="input.name" placeholder="Enter input name" />
       </div>
@@ -19,8 +22,7 @@
           <option value="BTN">Button</option>
           <option value="SW">Switch</option>
           <option value="INVSW">Toggle Switch</option>
-        </select>
-      </div>
+        </select></div>
     </div>
 
     <h3>Events</h3>
@@ -88,7 +90,8 @@
     </div>
 
     <div class="form-actions">
-      <button class="save-button" (click)="save()">Save Changes</button>
+      <button class="cancel-button" (click)="back()">Back</button>
+      <button class="save-button" (click)="save()">Save</button>
     </div>
   </div>
 </div>

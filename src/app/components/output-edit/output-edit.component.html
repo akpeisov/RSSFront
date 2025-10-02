@@ -1,12 +1,16 @@
 <div class="output-edit-container">
   <div class="header">
-    <button class="back-button" (click)="cancel()">
+    <button class="back-button" (click)="back()">
       <img src="assets/icons/arrow-back.svg" width="24" height="24" alt="Back" />
     </button>
-    <h2>Редактирование выхода</h2>
+    <h2>Output configuration</h2>
   </div>
 
   <div class="output-edit-form">
+    <div class="form-group">
+      <label for="name">Output Id {{output.id}}
+        <span *ngIf="output.slaveId != 0"> Slave Id {{output.slaveId}}</span></label>      
+    </div>
     <div class="form-group">
       <label for="name">Имя выхода</label>
       <input type="text" id="name" [(ngModel)]="output.name" />
@@ -74,8 +78,8 @@
     </div>
 
     <div class="actions">
-      <button class="cancel-button" (click)="cancel()">Отмена</button>
-      <button class="save-button" (click)="save()">Сохранить</button>
+      <button class="cancel-button" (click)="back()">Back</button>
+      <button class="save-button" (click)="save()">Save</button>
     </div>
   </div>
 
