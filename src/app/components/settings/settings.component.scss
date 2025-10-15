@@ -1,34 +1,20 @@
-// Ethernet row: group fields horizontally on desktop, stack on mobile
-.eth-row {
-	display: flex;
-	gap: 1rem;
-	margin-bottom: 1rem;
-	flex-wrap: wrap;
-}
-
-@media (max-width: 600px) {
-	.eth-row {
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-}
-.wifi-row {
+.net-row {
 	display: flex;	
 	gap: 1rem;	
 	margin-bottom: 1rem;
 	flex-wrap: wrap;
 }
-.wifi-row label {
+.net-row label {
 	flex: 1 1 45%;
 	min-width: 120px;
 	max-width: 48%;
 }
 @media (max-width: 700px) {
-	.wifi-row {
+	.net-row {
 		flex-direction: column;
 		gap: 0;
 	}
-	.wifi-row label {
+	.net-row label {
 		min-width: 0;
 		max-width: 100%;
 		width: 100%;
@@ -106,4 +92,203 @@
 	gap: 16px;
 	justify-content: flex-end;
 	margin-top: 12px;
+}
+
+
+.settings-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: var(--bg-primary);
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+
+    .back-button {
+      background: none;
+      border: none;
+      padding: 8px;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: var(--text-color);
+    }
+  }
+
+  .settings-form {
+    background-color: var(--bg-secondary);
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--shadow-color);
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+
+      &.inline {
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      input, select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--bg-primary);
+        color: var(--text-color);
+        font-size: 1rem;
+        transition: border-color 0.3s;
+        box-sizing: border-box;
+  
+        &:focus {
+          outline: none;
+          border-color: var(--button-bg);
+        }
+      }
+
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin: 0;
+      }
+    }
+  }  
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+
+    button {
+      padding: 8px 24px;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &.cancel-button {
+        background-color: var(--bg-secondary);
+        color: var(--text-color);
+
+        &:hover {
+          background-color: var(--border-color);
+        }
+      }
+
+      &.save-button {
+        background-color: var(--button-bg);
+        color: var(--button-text);
+
+        &:hover {
+          background-color: var(--button-hover);
+        }
+      }
+    }
+  }
+
+  .task-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .task-card {
+    background-color: var(--bg-primary);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    
+    .task-header {
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+
+      h4 {
+        margin: 0;
+        color: var(--text-color);
+        font-size: 1.1rem;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .task-action {
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid var(--border-color);        
+  }
+
+  .switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+  margin-left: 12px;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--switch-bg);
+    border-radius: 24px;
+    transition: 0.4s;
+
+    &:before {
+      position: absolute;
+      content: '';
+      height: 20px;
+      width: 20px;
+      left: 2px;
+      bottom: 2px;
+      background-color: var(--bg-secondary);
+      border-radius: 50%;
+      transition: 0.4s;
+    }
+  }
+
+  input:checked + .slider {
+    background-color: var(--switch-bg-active);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(24px);
+  }
+}
 }

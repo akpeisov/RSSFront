@@ -57,8 +57,7 @@ export class InputEditComponent implements OnInit {
         this.outputs = outputs;
         //console.log('outputs', this.outputs);
       });
-    }
-    //this.updateEvents();
+    }    
   }
 
   updateEvents(): void {

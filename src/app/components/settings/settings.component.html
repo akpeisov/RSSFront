@@ -1,241 +1,277 @@
-
-<button class="back-btn" [routerLink]="['/controller', mac]">Back</button>
-
-Test mac {{mac}} {{config?.mac}}
-
-<div *ngIf="config">
-
-  <div class="settings-section">
-    <h2>Network Settings</h2>
-    <div class="settings-panel">
-      <div class="modal-body">
-        <div class="network-section">
-          <h4>WiFi</h4>
-          <label *ngIf="config.network.wifi">Enabled
-            <input type="checkbox" [(ngModel)]="config.network.wifi.enabled" />
-          </label>
-          <div class="wifi-row" *ngIf="config.network.wifi && config.network.wifi.enabled">
-            <label>SSID
-              <input type="text" [(ngModel)]="config.network.wifi.ssid" />
-            </label>
-            <label>Password
-              <input type="text" [(ngModel)]="config.network.wifi.pass" />
-            </label>
-          </div>
-          <label *ngIf="config.network.wifi && config.network.wifi.enabled">DHCP
-            <input type="checkbox" [(ngModel)]="config.network.wifi.dhcp" />
-          </label>
-          <div class="wifi-row" *ngIf="config.network.wifi && config.network.wifi.enabled && !config.network.wifi.dhcp">
-            <label>IP
-              <input type="text" mask="IP" [(ngModel)]="config.network.wifi.ip" />
-            </label>
-            <label>Netmask
-              <input type="text" [(ngModel)]="config.network.wifi.netmask" />
-            </label>
-          </div>
-          <div class="wifi-row" *ngIf="config.network.wifi && config.network.wifi.enabled && !config.network.wifi.dhcp">
-            <label>Gateway
-              <input type="text" [(ngModel)]="config.network.wifi.gateway" />
-            </label>
-            <label>DNS
-              <input type="text" [(ngModel)]="config.network.wifi.dns" />
-            </label>
-          </div>
-          <label *ngIf="config.network.wifi && config.network.wifi.enabled && !config.network.wifi.dhcp">DNS
-            <input type="text" [(ngModel)]="config.network.wifi.dns" />
-          </label>
-        </div>
-        <div class="network-section">
-          <h4>Ethernet</h4>
-          <label *ngIf="config.network.eth">Enabled
-            <input type="checkbox" [(ngModel)]="config.network.eth.enabled" />
-          </label>
-          <label *ngIf="config.network.eth && config.network.eth.enabled">DHCP
-            <input type="checkbox" [(ngModel)]="config.network.eth.dhcp" />
-          </label>
-            <div class="eth-row" *ngIf="config.network.eth && config.network.eth.enabled && !config.network.eth.dhcp">
-              <label>IP
-                <input type="text" [(ngModel)]="config.network.eth.ip" />
-              </label>
-              <label>Netmask
-                <input type="text" [(ngModel)]="config.network.eth.netmask" />
-              </label>
-            </div>
-            <div class="eth-row" *ngIf="config.network.eth && config.network.eth.enabled && !config.network.eth.dhcp">
-              <label>Gateway
-                <input type="text" [(ngModel)]="config.network.eth.gateway" />
-              </label>
-              <label>DNS
-                <input type="text" [(ngModel)]="config.network.eth.dns" />
-              </label>
-            </div>
-          <label *ngIf="config.network.eth && config.network.eth.enabled">Enable Reset
-            <input type="checkbox" [(ngModel)]="config.network.eth.enableReset" />
-          </label>
-          <label *ngIf="config.network.eth && config.network.eth.enabled && config.network.eth.enableReset">Reset GPIO
-            <input type="number" [(ngModel)]="config.network.eth.resetGPIO" />
-          </label>
-        </div>
-        <div class="network-section">
-          <h4>NTP</h4>
-          <label>NTP Server
-            <input type="text" [(ngModel)]="config.network.ntpServer" />
-          </label>
-          <label *ngIf="config.network.ntpServer">Time Zone
-            <input type="text" [(ngModel)]="config.network.ntpTZ" />
-          </label>
-        </div>
-        <div class="network-section">
-          <h4>OTA</h4>
-          <label>OTA URL
-            <input type="text" [(ngModel)]="config.network.otaURL" />
-          </label>
-        </div>
-        <div class="network-section">
-          <h4>Cloud</h4>
-          <label *ngIf="config.network.cloud">Enabled
-            <input type="checkbox" [(ngModel)]="config.network.cloud.enabled" />
-          </label>
-          <label *ngIf="config.network.cloud && config.network.cloud.enabled">Address
-            <input type="text" [(ngModel)]="config.network.cloud.address" />
-          </label>
-        </div>
-        <div class="network-section">
-          <h4>FTP</h4>
-          <label *ngIf="config.network.ftp">Enabled
-            <input type="checkbox" [(ngModel)]="config.network.ftp.enabled" />
-          </label>
-          <label *ngIf="config.network.ftp && config.network.ftp.enabled">User
-            <input type="text" [(ngModel)]="config.network.ftp.user" />
-          </label>
-          <label *ngIf="config.network.ftp && config.network.ftp.enabled">Password
-            <input type="text" [(ngModel)]="config.network.ftp.pass" />
-          </label>
-        </div>
-    </div>
-    <div class="error-message" *ngIf="formError">{{ formError }}</div>    
-  </div>  
-
-    
-  <div class="settings-section">
-    <h2>Modbus Settings</h2>
-    <div class="settings-panel">
-      <div class="modal-body">
-        <label>Mode
-          <select [(ngModel)]="config.modbus.mode">
-            <option value="none">None</option>
-            <option value="master">Master</option>
-            <option value="slave">Slave</option>
-          </select>
-        </label>
-        <div *ngIf="config.modbus.mode === 'master'">
-          <label>Polling Time
-            <input type="number" [(ngModel)]="config.modbus.pollingTime">
-          </label>
-          <label>Read Timeout
-            <input type="number" [(ngModel)]="config.modbus.readTimeout">
-          </label>
-          <label>Max Retries
-            <input type="number" [(ngModel)]="config.modbus.maxRetries">
-          </label>
-          <label>Action on same slave
-            <input type="checkbox" [(ngModel)]="config.modbus.actionOnSameSlave">
-          </label>
-        </div>
-        <div *ngIf="config.modbus.mode === 'slave'">
-          <label>SlaveId
-            <input type="number" [(ngModel)]="config.modbus.slaveId">
-          </label>
-          <label>Master
-            <select [(ngModel)]="config.modbus.master">
-              <option *ngFor="let ctrl of availableMaster" [value]="ctrl.mac">{{ ctrl.name }}</option>
-            </select>
-          </label>
-        </div>						
-      </div>
-    </div>
+<div class="settings-container">  
+  <div class="header">
+    <button class="back-button" (click)="back()">
+      <img src="assets/icons/arrow-back.svg" width="24" height="24" alt="Back" />
+    </button>
+    <h2>Controller configuration</h2>
   </div>
 
-  <div class="settings-section">
-    <h2>Scheduler</h2>
-    <div class="settings-panel">
-      <div class="modal-body">
-        <label>Enabled
-          <input type="checkbox" [(ngModel)]="config.scheduler.enabled"/>          
-        </label>
-        <div *ngFor="let task of config.scheduler.tasks; let i = index" class="scheduler-task">
-          <div class="task-header">
-            <label>Enabled
-              <input type="checkbox" [(ngModel)]="task.enabled">
-            </label>
-            <label>Name
-              <input type="text" [(ngModel)]="task.name">
-            </label>
-            <button type="button" (click)="config.scheduler.tasks.splice(i,1)">🗑️</button>
-          </div>
-          <div class="task-fields">
-            <label>Grace (сек)
-              <input type="number" [(ngModel)]="task.grace">
-            </label>
-            <label>Время
-              <input type="time"
-                [value]="(task.time !== undefined ? ((task.time/60) | number:'2.0-0')+':' + ((task.time%60)<10 ? '0'+(task.time%60) : (task.time%60)) : '')"
-                (change)="updateTaskTime(task, $any($event.target).value)"
-                style="width:90px;"
-                title="Выберите время"
-              >
-            </label>
-            <label>Done
-              <input type="checkbox" [(ngModel)]="task.done">
-            </label>
-          </div>
-          <div class="task-dow" style="display:flex;align-items:center;gap:8px;">
-            <span>Дни недели:</span>
-            <ng-container *ngFor="let day of [0,1,2,3,4,5,6]">
-              <label style="margin-bottom:0;">
-                <input type="checkbox" [checked]="task.dow.includes(day)" (change)="toggleDow(task, day)">{{ ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][day] }}
+  <div *ngIf="config">
+    <div class="settings-form">
+      <h2>Network Settings</h2>
+      <div class="settings-panel">
+        <div class="modal-body">
+          <div class="network-section">
+            <h4>WiFi</h4>
+            <div class="form-group inline">
+              <label for="wifi">Enabled</label>
+              <label class="switch" *ngIf="config.network.wifi">
+                <input type="checkbox" id="wifi" [(ngModel)]="config.network.wifi.enabled"/>
+                <span class="slider round"></span>
               </label>
-            </ng-container>
-          </div>
-          <div class="task-actions">
-            <span>Действия:</span>
-            <div *ngFor="let action of task.actions; let j = index" class="action-row">
-              <label>Type
-                <select [(ngModel)]="action.type">
-                  <option value="output">output</option>
-                  <option value="input">input</option>
-                </select>
+            </div>              
+            <div class="net-row" *ngIf="config.network.wifi && config.network.wifi.enabled">
+              <label>SSID
+                <input type="text" [(ngModel)]="config.network.wifi.ssid" />
               </label>
-              <label>Action
-                <select [(ngModel)]="action.action">
-                  <option *ngIf="action.type === 'output'" value="on">on</option>
-                  <option *ngIf="action.type === 'output'" value="off">off</option>
-                  <option *ngIf="action.type === 'input'" value="toggle">toggle</option>
-                  <option *ngIf="action.type === 'input'" value="longpress">longpress</option>
-                </select>
+              <label>Password
+                <input type="text" [(ngModel)]="config.network.wifi.pass" />
               </label>
-              <label *ngIf="action.type === 'output'">Output
-                <select [(ngModel)]="action.output">
-                  <option *ngFor="let out of config?.io?.outputs; let oi = index" [value]="oi">{{ out.name || ('Output '+oi) }}</option>
-                </select>
-              </label>
-              <label *ngIf="action.type === 'input'">Input
-                <select [(ngModel)]="action.input">
-                  <option *ngFor="let inp of config?.io?.inputs; let ii = index" [value]="ii">{{ inp.name || ('Input '+ii) }}</option>
-                </select>
-              </label>
-              <button type="button" (click)="task.actions.splice(j,1)">🗑️</button>
             </div>
-            <button type="button" (click)="task.actions.push({action:'on',type:'output',output:0})">+ Добавить действие</button>
+            <div class="form-group inline">
+              <label for="dwifi">DHCP</label>
+              <label class="switch" *ngIf="config.network.wifi && config.network.wifi.enabled">
+                <input type="checkbox" id="dwifi" [(ngModel)]="config.network.wifi.dhcp"/>
+                <span class="slider round"></span>
+              </label>
+            </div>                          
+            <div class="net-row" *ngIf="config.network.wifi && config.network.wifi.enabled && !config.network.wifi.dhcp">
+              <label>IP
+                <input type="text" mask="IP" [(ngModel)]="config.network.wifi.ip" />
+              </label>
+              <label>Netmask
+                <input type="text" [(ngModel)]="config.network.wifi.netmask" />
+              </label>
+            </div>
+            <div class="net-row" *ngIf="config.network.wifi && config.network.wifi.enabled && !config.network.wifi.dhcp">
+              <label>Gateway
+                <input type="text" [(ngModel)]="config.network.wifi.gateway" />
+              </label>
+              <label>DNS
+                <input type="text" [(ngModel)]="config.network.wifi.dns" />
+              </label>
+            </div>            
           </div>
-        </div>
-        <button type="button" (click)="config.scheduler.tasks.push({name:'',grace:0,time:0,enabled:true,dow:[0,0,0,0,0,0,0],done:false,actions:[]})">+ Добавить задачу</button>
+          <div class="network-section">
+            <h4>Ethernet</h4>
+            <div class="form-group inline">
+              <label for="eth">Enabled</label>
+              <label class="switch" *ngIf="config.network.eth">
+                <input type="checkbox" id="wth" [(ngModel)]="config.network.eth.enabled"/>
+                <span class="slider round"></span>
+              </label>
+            </div> 
+            <div *ngIf="config.network.eth && config.network.eth.enabled">
+              <div class="form-group inline">
+                <label for="deth">DHCP</label>
+                <label class="switch" *ngIf="config.network.eth && config.network.eth.enabled">
+                  <input type="checkbox" id="deth" [(ngModel)]="config.network.eth.dhcp"/>
+                  <span class="slider round"></span>
+                </label>
+              </div>   
+              <div class="net-row" *ngIf="config.network.eth && config.network.eth.enabled && !config.network.eth.dhcp">
+                <label>IP
+                  <input type="text" [(ngModel)]="config.network.eth.ip" />
+                </label>
+                <label>Netmask
+                  <input type="text" [(ngModel)]="config.network.eth.netmask" />
+                </label>
+              </div>
+              <div class="net-row" *ngIf="config.network.eth && config.network.eth.enabled && !config.network.eth.dhcp">
+                <label>Gateway
+                  <input type="text" [(ngModel)]="config.network.eth.gateway" />
+                </label>
+                <label>DNS
+                  <input type="text" [(ngModel)]="config.network.eth.dns" />
+                </label>
+              </div>            
+              <div class="form-group inline">
+                <label for="reth">Enable Reset</label>
+                <label class="switch" *ngIf="config.network.eth && config.network.eth.enabled">
+                  <input type="checkbox" id="reth" [(ngModel)]="config.network.eth.enableReset"/>
+                  <span class="slider round"></span>
+                </label>
+              </div>   
+              <label *ngIf="config.network.eth && config.network.eth.enabled && config.network.eth.enableReset">Reset GPIO
+                <input type="number" [(ngModel)]="config.network.eth.resetGPIO" />
+              </label>
+            </div>
+          </div>            
+          <div class="network-section">
+            <h4>NTP</h4>
+            <label>NTP Server
+              <input type="text" [(ngModel)]="config.network.ntpServer" />
+            </label>
+            <label *ngIf="config.network.ntpServer">Time Zone
+              <input type="text" [(ngModel)]="config.network.ntpTZ" />
+            </label>
+          </div>
+          <div class="network-section">
+            <h4>OTA</h4>
+            <label>OTA URL
+              <input type="text" [(ngModel)]="config.network.otaURL" />
+            </label>
+          </div>
+          <div class="network-section">
+            <h4>Cloud</h4>
+            <div class="form-group inline">
+              <label for="cloud">Enabled</label>
+              <label class="switch" *ngIf="config.network.cloud">
+                <input type="checkbox" id="cloud" [(ngModel)]="config.network.cloud.enabled"/>
+                <span class="slider round"></span>
+              </label>
+            </div>             
+            <label *ngIf="config.network.cloud && config.network.cloud.enabled">Address
+              <input type="text" [(ngModel)]="config.network.cloud.address" />
+            </label>
+          </div>
+          <div class="network-section">
+            <h4>FTP</h4>
+            <div class="form-group inline">
+              <label for="ftp">Enabled</label>
+              <label class="switch" *ngIf="config.network.ftp">
+                <input type="checkbox" id="ftp" [(ngModel)]="config.network.ftp.enabled"/>
+                <span class="slider round"></span>
+              </label>
+            </div>                  
+            <label *ngIf="config.network.ftp && config.network.ftp.enabled">User
+              <input type="text" [(ngModel)]="config.network.ftp.user" />
+            </label>
+            <label *ngIf="config.network.ftp && config.network.ftp.enabled">Password
+              <input type="text" [(ngModel)]="config.network.ftp.pass" />
+            </label>
+          </div>
+
+          <div class="network-section">
+            <h4>Modbus</h4>
+            <label>Mode
+              <select [(ngModel)]="config.modbus.mode">
+                <option value="none">None</option>
+                <option value="master">Master</option>
+                <option value="slave">Slave</option>
+              </select>
+            </label>
+            <div *ngIf="config.modbus.mode === 'master'">
+              <label>Polling Time
+                <input type="number" [(ngModel)]="config.modbus.pollingTime">
+              </label>
+              <label>Read Timeout
+                <input type="number" [(ngModel)]="config.modbus.readTimeout">
+              </label>
+              <label>Max Retries
+                <input type="number" [(ngModel)]="config.modbus.maxRetries">
+              </label>              
+              <div class="form-group inline">
+                <label>Action on same slave</label>
+                <label class="switch">
+                  <input type="checkbox" [(ngModel)]="config.modbus.actionOnSameSlave"/>
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+            <div *ngIf="config.modbus.mode === 'slave'">
+              <label>SlaveId
+                <input type="number" [(ngModel)]="config.modbus.slaveId">
+              </label>
+              <label>Master
+                <select [(ngModel)]="config.modbus.master">
+                  <option *ngFor="let ctrl of availableMaster" [value]="ctrl.mac">{{ ctrl.name }}</option>
+                </select>
+              </label>
+            </div>	            
+          </div>
+
+          <div class="network-section">
+            <h4>Scheduler</h4>
+            <div class="form-group inline">
+              <label for="scheduler">Enabled</label>
+              <label class="switch">
+                <input type="checkbox" id="scheduler" [(ngModel)]="config.scheduler.enabled"/>
+                <span class="slider round"></span>
+              </label>
+            </div>
+            <div class="task-container" *ngIf="config.scheduler.enabled">
+              <div class="task-card" *ngFor="let task of config.scheduler.tasks; let i = index">
+                <div class="task-header">
+                  <label>Name
+                    <input type="text" [(ngModel)]="task.name">
+                  </label>
+                  <div class="form-group inline">
+                    <label for="task">Task enabled</label>
+                    <label class="switch">
+                      <input type="checkbox" id="task" [(ngModel)]="task.enabled"/>
+                      <span class="slider round"></span>
+                    </label>
+                  </div>   
+                  <div class="form-group inline">
+                    <label for="taskd">Task done</label>
+                    <label class="switch">
+                      <input type="checkbox" id="taskd" [(ngModel)]="task.done"/>
+                      <span class="slider round"></span>
+                    </label>
+                  </div>       
+                  <button type="button" (click)="config.scheduler.tasks.splice(i,1)">🗑️</button>
+                </div>
+                <div class="task-fields">
+                  <label>Grace, min
+                    <input type="number" [(ngModel)]="task.grace">
+                  </label>
+                  <label>Time
+                    <input type="time"
+                      [value]="(task.time !== undefined ? ((task.time/60) | number:'2.0-0')+':' + ((task.time%60)<10 ? '0'+(task.time%60) : (task.time%60)) : '')"
+                      (change)="updateTaskTime(task, $any($event.target).value)"
+                      style="width:90px;"                      
+                    >
+                  </label>                                      
+                </div>
+                <div class="task-dow" style="display:flex;align-items:center;gap:8px;">
+                  <span>Days of week</span>
+                  <ng-container *ngFor="let day of [0,1,2,3,4,5,6]">
+                    <label style="margin-bottom:0;">
+                      <input type="checkbox" [checked]="task.dow.includes(day)" (change)="toggleDow(task, day)">{{ ['Mo','Tu','We','Th','Fr','St','Su'][day] }}
+                    </label>
+                  </ng-container>
+                </div>
+                <div class="task-actions">
+                  <span>Actions</span>
+                  <div class="task-action" *ngFor="let action of task.actions; let j = index">
+                    <label>Type
+                      <select [(ngModel)]="action.type">
+                        <option value="output">output</option>
+                        <option value="input">input</option>
+                      </select>
+                    </label>                    
+                    <label *ngIf="action.type === 'output'">Output
+                      <select [(ngModel)]="action.output">
+                        <option *ngFor="let out of config?.io?.outputs; let oi = index" [value]="oi">{{ out.name || ('Output '+oi) }}</option>
+                      </select>
+                    </label>
+                    <label *ngIf="action.type === 'input'">Input
+                      <select [(ngModel)]="action.input">
+                        <option *ngFor="let inp of config?.io?.inputs; let ii = index" [value]="ii">{{ inp.name || ('Input '+ii) }}</option>
+                      </select>
+                    </label>
+                    <label>Action
+                      <select [(ngModel)]="action.action">
+                        <option *ngIf="action.type === 'output'" value="on">on</option>
+                        <option *ngIf="action.type === 'output'" value="off">off</option>
+                        <option *ngIf="action.type === 'input'" value="toggle">toggle</option>
+                        <option *ngIf="action.type === 'input'" value="longpress">longpress</option>
+                      </select>
+                    </label>
+                    <button type="button" (click)="task.actions.splice(j,1)">Delete action</button>
+                  </div>
+                  <button type="button" (click)="task.actions.push({action:'on',type:'output',output:0})">+ Add action</button>
+                </div>
+              </div>
+              <button type="button" (click)="config.scheduler.tasks.push({name:'',grace:0,time:0,enabled:true,dow:[0,0,0,0,0,0,0],done:false,actions:[]})">+ New task</button>
+            </div>
+          </div>
       </div>
+      <div class="error-message" *ngIf="formError">{{ formError }}</div>    
+    </div>  
+    <div class="actions">      
+      <button class="save-button" (click)="saveConfig()">Save</button>
     </div>
-  </div>      
-
+  </div>
 </div>
-
-<div class="modal-actions">
-  <button (click)="saveConfig()">Save</button>
-</div> 

@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { CommonModule, Location } from '@angular/common';
 import { DataService } from '../../services/data.service';
 import { RouterModule } from '@angular/router';
 import { ControllerConfig } from '../../model/controller-config';
 import { WebsocketService } from '../../services/websocket.service';
+import { AnimationService } from '../../services/animation.service';
 
 @Component({
   selector: 'app-settings',
@@ -22,6 +24,9 @@ export class SettingsComponent implements OnInit {
 
   constructor(private dataService: DataService, 
               private route: ActivatedRoute,
+              private router: Router,
+              private location: Location,
+              private animationService: AnimationService,
               private websocketService: WebsocketService) {}
 
   ngOnInit() {
@@ -29,7 +34,49 @@ export class SettingsComponent implements OnInit {
     //this.availableMaster = (this.dataService.controllers || []).filter((ctrl: any) => ctrl.modbus?.mode !== 'slave');
     this.dataService.getControllerByMacWithFetch(this.mac).subscribe((config) => {
       //console.log('Fetched', config)
-      this.config = config;
+      // Корректная инициализация config и всех вложенных объектов
+      const emptyConfig: ControllerConfig = {
+        mac: this.mac,
+        modbus: {
+          mode: 'none',
+          pollingTime: 100,
+          readTimeout: 200,
+          maxRetries: 3,
+          actionOnSameSlave: false
+        },
+        network: {
+          mac: this.mac,
+          ntpServer: 'pool.ntp.org',
+          ntpTZ: 'UTC-5:00',
+          otaURL: 'https://api.akpeisov.kz/RelayController.bin',
+          cloud: { address: 'wss://api.akpeisov.kz/ws', enabled: false },
+          eth: { enabled: false, dhcp: true, ip: '', netmask: '', gateway: '', dns: '', enableReset: false, resetGPIO: 0 },
+          wifi: { enabled: false, dhcp: true, ip: '', netmask: '', gateway: '', ssid: '', pass: '', dns: '' },
+          ftp: { enabled: false, user: 'admin', pass: 'admin' }
+        },
+        scheduler: { enabled: false, tasks: [] },
+        io: { outputs: [], inputs: [] }
+      };
+      // Если config не пришёл, используем пустой
+      if (!config) {
+        this.config = emptyConfig;
+      } else {
+        // Если config пришёл, дополняем недостающие объекты
+        this.config = {
+          mac: config.mac ?? this.mac,
+          modbus: { ...emptyConfig.modbus, ...(config.modbus ?? {}) },
+          network: {
+            ...emptyConfig.network,
+            ...(config.network ?? {}),
+            cloud: { ...emptyConfig.network.cloud, ...(config.network?.cloud ?? {}) },
+            eth: { ...emptyConfig.network.eth, ...(config.network?.eth ?? {}) },
+            wifi: { ...emptyConfig.network.wifi, ...(config.network?.wifi ?? {}) },
+            ftp: { ...emptyConfig.network.ftp, ...(config.network?.ftp ?? {}) }
+          },
+          scheduler: { ...emptyConfig.scheduler, ...(config.scheduler ?? {}) },
+          io: { ...emptyConfig.io, ...(config.io ?? {}) }
+        };
+      }
       this.initModbusConfig();
     });
   }
@@ -199,6 +246,18 @@ export class SettingsComponent implements OnInit {
       type: 'SETDEVICECONFIG',
       payload: this.config      
     });    
+  }
+
+  public back(): void {
+    this.animationService.triggerLeaveAnimation();
+    setTimeout(() => {
+      if (this.mac) {
+        this.router.navigate(['/controller', this.mac]);
+      } else {
+        this.location.back();
+      }
+    }, 150); // Half the animation duration for smoother transition
+    // <!-- <button class="back-btn" [routerLink]="['/controller', mac]">Back</button> -->
   }
 
 }
