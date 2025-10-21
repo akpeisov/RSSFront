@@ -38,7 +38,7 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   showServicePopup: boolean = false;
   showLogsPanel: boolean = false;
   logs: string[] = [];
-  settingsMenuOpen = false;
+  actionsMenuOpen = false;
   showRebootConfirm = false;
   showUpdateConfirm = false;
   showUploadConfirm = false;  
@@ -257,28 +257,28 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
     return Array.isArray(this.logs) ? this.logs.join('\n') : String(this.logs);
   }
   
-  toggleSettingsMenu(event: Event) {
+  toggleActionsMenu(event: Event) {
     event.stopPropagation();
-    this.settingsMenuOpen = !this.settingsMenuOpen;
+    this.actionsMenuOpen = !this.actionsMenuOpen;
   }
 
   onMenuInfo() {
-    this.settingsMenuOpen = false;
+    this.actionsMenuOpen = false;
     this.showInfo();
   }
 
   onMenuReboot() {
-    this.settingsMenuOpen = false;
+    this.actionsMenuOpen = false;
     this.showRebootConfirm = true;
   }
 
   onMenuUpdate() {
-    this.settingsMenuOpen = false;
+    this.actionsMenuOpen = false;
     this.showUpdateConfirm = true;
   }
 
   onMenuLogs() {
-    this.settingsMenuOpen = false;
+    this.actionsMenuOpen = false;
     this.showLogs();
   }
 

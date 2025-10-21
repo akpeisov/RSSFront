@@ -4,7 +4,7 @@ export const environment = {
   apiUrl: 'http://192.168.4.120:8888',
   wsUrl: 'ws://192.168.4.120:8888/ws',
   keycloak: {
-    url: 'https://3keycloak.akpeisov.kz',
+    url: 'https://keycloak.akpeisov.kz',
     realm: 'RelaySmartSystems',
     clientId: 'RelaySmartSystemsFront'
   }

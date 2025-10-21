@@ -18,11 +18,11 @@
             <img src="assets/icons/settings-icon.svg" width="28" height="28" alt="Settings" />  
           </button>
         </div>
-        <div class="settings-dropdown" [class.open]="settingsMenuOpen" (mouseleave)="settingsMenuOpen = false">
-          <button class="settings-btn" (click)="toggleSettingsMenu($event)">
-            <img src="assets/icons/settings-icon.svg" width="28" height="28" alt="Actions" />
+        <div class="settings-dropdown" [class.open]="actionsMenuOpen" (mouseleave)="actionsMenuOpen = false">
+          <button class="settings-btn" (click)="toggleActionsMenu($event)">
+            <img src="assets/icons/dots.png" width="28" height="28" alt="Actions" />
           </button>
-          <ul class="dropdown-menu" *ngIf="settingsMenuOpen">
+          <ul class="dropdown-menu" *ngIf="actionsMenuOpen">
             <li (click)="onMenuInfo()">Info</li>
             <li (click)="onMenuReboot()">Reboot</li>
             <li (click)="onMenuUpdate()">Update</li>

@@ -6,7 +6,7 @@
         <img src="assets/icons/edit.svg" width="20" height="20" alt="Edit" />
       </button>
       <label class="switch">
-        <input type="checkbox" [checked]="output.state === 'on'" (change)="onChange($event)" />
+        <input type="checkbox" [checked]="output.state === 'on'" (click)="onChange($event)" />
         <span class="slider round"></span>
       </label>
     </div>

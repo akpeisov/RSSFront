@@ -32,7 +32,7 @@ export class OutputCardComponent {
 
   onChange($event: Event): void {
     const newValue = ($event.target as HTMLInputElement).checked;
-    //console.log("changed ", newValue)
+    //console.log("changed ", newValue)    
     this.toggleSubject.next({ output: this.output.id, action: newValue ? "on" : "off", slaveId: this.output.slaveId });
   }
 
