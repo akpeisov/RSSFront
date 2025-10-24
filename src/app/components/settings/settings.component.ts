@@ -243,7 +243,7 @@ export class SettingsComponent implements OnInit {
       return;
     }
     this.websocketService.sendMessage({
-      type: 'SETDEVICECONFIG',
+      type: 'DEVICECONFIG',
       payload: this.config      
     });    
   }
