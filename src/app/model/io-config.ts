@@ -4,6 +4,7 @@ export interface IOConfig {
 }
 
 export interface Output {
+  uuid: string;
   id: number;
   name: string;
   type: 's' | 't';
@@ -14,7 +15,8 @@ export interface Output {
   alice: boolean;
   room?: string;
   default: 'on' | 'off';
-  slaveId?: number; // Added slaveId to the interface
+  slaveId?: number;
+  mac?: string;
 }
 
 export interface Input {

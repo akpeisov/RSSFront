@@ -3,6 +3,7 @@ import { FormsModule } from "@angular/forms";
 import { debounceTime, Subject } from "rxjs";
 import { WebsocketService } from "../../services/websocket.service";
 import { NgIf } from "@angular/common";
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-output-card',
@@ -17,11 +18,12 @@ import { NgIf } from "@angular/common";
 export class OutputCardComponent {
   @Input() output: any;
   @Input() mac: any;
-  @Output() edit = new EventEmitter<any>();
+  //@Output() edit = new EventEmitter<any>();
 
   private toggleSubject = new Subject<{ output: number, action: string, slaveId: number }>();
 
-  constructor(private websocketService: WebsocketService) {
+  constructor(private websocketService: WebsocketService,
+              private router: Router) {
     this.toggleSubject.pipe(debounceTime(300)).subscribe(({ output, action, slaveId }) => {
       this.websocketService.sendMessage({
         type: 'ACTION',
@@ -36,8 +38,12 @@ export class OutputCardComponent {
     this.toggleSubject.next({ output: this.output.id, action: newValue ? "on" : "off", slaveId: this.output.slaveId });
   }
 
+  // onEdit(): void {
+  //   this.edit.emit(this.output);
+  // }
   onEdit(): void {
-    this.edit.emit(this.output);
+    console.log(this.output.uuid);
+    this.router.navigate(['/output-edit', this.output.uuid]);
   }
 }
 

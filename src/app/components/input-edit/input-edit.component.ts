@@ -55,7 +55,7 @@ export class InputEditComponent implements OnInit {
 
       this.dataService.getOutputsByInputUuid(uuid).subscribe((outputs) => {
         this.outputs = outputs;
-        //console.log('outputs', this.outputs);
+        console.log('outputs', this.outputs);
       });
     }    
   }
@@ -83,42 +83,7 @@ export class InputEditComponent implements OnInit {
       ];
     }
   }
-
-  updateEvents2(): void {
-    // Update events based on input type
-    if (this.input.type === 'INVSW') {
-      // For INVSW, ensure there's only one event with 'toggle'
-      this.input.events = [{
-        event: 'toggle',
-        actions: this.input.events?.find((e: { event: string }) => e.event === 'toggle')?.actions || []
-      }];
-    } else if (this.input.type === 'SW') {
-      // For SW, ensure there are 'on' and 'off' events
-      this.input.events = [
-        {
-          event: 'on',
-          actions: this.input.events?.find((e: { event: string }) => e.event === 'on')?.actions || []
-        },
-        {
-          event: 'off',
-          actions: this.input.events?.find((e: { event: string }) => e.event === 'off')?.actions || []
-        }
-      ];
-    } else if (this.input.type === 'BTN') {
-      // For BTN, ensure there are 'toggle' and 'longpress' events
-      this.input.events = [
-        {
-          event: 'toggle',
-          actions: this.input.events?.find((e: { event: string }) => e.event === 'toggle')?.actions || []
-        },
-        {
-          event: 'longpress',
-          actions: this.input.events?.find((e: { event: string }) => e.event === 'longpress')?.actions || []
-        }
-      ];
-    }
-  }
-
+  
   addAction(eventIndex: number): void {
     const actions = this.input.events[eventIndex].actions;
     const maxOrder = actions.reduce((max: number, action: any) => {
@@ -224,7 +189,7 @@ export class InputEditComponent implements OnInit {
   }
 
   save(): void {
-    console.log('Saving data:', this.input);
+    console.log('Saving input:', this.input);
     this.toggleSubject.next({ payload: this.input });
     this.back();
   }

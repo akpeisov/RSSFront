@@ -56,8 +56,9 @@
         </div>
         <app-output-card *ngFor="let output of slaveGroup.value" 
                          [output]="output" 
-                         [mac]="controller?.mac"
-                         (edit)="onEditOutput($event)">
+                         [mac]="controller?.mac">
+                         <!-- (edit)="onEditOutput($event)" -->
+                         
         </app-output-card>
       </ng-container>
     </div>
@@ -99,8 +100,8 @@
           </div>
           <app-output-card *ngFor="let output of slaveGroup.value" 
                            [output]="output" 
-                           [mac]="controller?.mac"
-                           (edit)="onEditOutput($event)">
+                           [mac]="controller?.mac">
+                           <!-- (edit)="onEditOutput($event)" -->
           </app-output-card>
         </ng-container>
       </div>

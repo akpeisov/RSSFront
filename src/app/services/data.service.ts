@@ -5,6 +5,7 @@ import {IUpdateIOMsg} from "../model/update-io-msg";
 import {map, tap} from "rxjs/operators";
 import { IWSMsg } from '../model/ws-mgs';
 import { environment } from '../../environments/environment';
+import { Output } from '../model/io-config';
 
 @Injectable({
   providedIn: 'root',
@@ -66,8 +67,35 @@ export class DataService {
     }
   }
 
-  getInputByUuid(uuid: string): Observable<any | null> {
-    //console.log('getInputByUuid', uuid);
+  getOutputByUuid(uuid: string): Observable<Output> {    
+    if (this.controllers.length === 0) {      
+      // Если контроллеры не загружены, загружаем их
+      return this.getUserDevices().pipe(
+        map(() => {
+          return this.findOutputByUuid(uuid);
+        })
+      );
+    } else {
+      // Если контроллеры уже есть, ищем вход сразу      
+      return of(this.findOutputByUuid(uuid));
+    }
+  }
+
+  private findOutputByUuid(uuid: string): Output {
+    // console.log('findInputByUuid', uuid, this.controllers)
+    for (const controller of this.controllers) {
+      if (controller && controller.io.outputs) {
+        const output = controller.io.outputs.find((output: any) => output.uuid === uuid);
+        if (output) {
+          output.mac = controller.mac
+          return output;
+        }
+      }
+    }
+    return { uuid: "" } as Output;
+  }
+
+  getInputByUuid(uuid: string): Observable<any | null> {    
     if (this.controllers.length === 0) {
       //console.log('controllers is empty, fetching from API...');
       // Если контроллеры не загружены, загружаем их

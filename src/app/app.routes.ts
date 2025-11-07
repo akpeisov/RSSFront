@@ -12,7 +12,7 @@ export const routes: Routes = [
   //{ path: 'controller/:id', component: ControllerDetailsComponent },
   { path: 'controller/:mac', component: ControllerDetailsComponent },
   { path: 'controller/:mac/settings', component: SettingsComponent },
-  { path: 'input-edit/:uuid', component: InputEditComponent },
+  { path: 'input-edit/:uuid', component: InputEditComponent },  
+  { path: 'output-edit/:uuid', component: OutputEditComponent },
   { path: 'linkcontroller/:mac', component: LinkControllerComponent },
-  { path: 'output-edit', component: OutputEditComponent },
 ];

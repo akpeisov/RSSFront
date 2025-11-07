@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EMPTY, ReplaySubject, OperatorFunction, timer } from 'rxjs';
+import { EMPTY, ReplaySubject, OperatorFunction, timer, BehaviorSubject } from 'rxjs';
 import { catchError, switchAll, tap, switchMap } from 'rxjs/operators';
 import { ErrorService } from './error.service';
 import { KeycloakService } from 'keycloak-angular';
@@ -33,6 +33,10 @@ export class WebsocketService {
       throw e;
     })
   );
+
+  // connection status: true = connected, false = disconnected
+  private connectionStatusSubject$ = new BehaviorSubject<boolean>(false);
+  public connectionStatus$ = this.connectionStatusSubject$.asObservable();
 
   constructor(
     private errorService: ErrorService,
@@ -131,6 +135,7 @@ export class WebsocketService {
         next: (event: Event) => {
           console.log('WebSocket connection opened:', event);
           this.isConnecting = false;
+          this.connectionStatusSubject$.next(true);
           this.sendHelloMessage();
         },
       },
@@ -138,6 +143,7 @@ export class WebsocketService {
         next: () => {
           console.log('WebSocket connection closed, attempting reconnect in 5s');
           this.isConnecting = false;
+          this.connectionStatusSubject$.next(false);
           if (this.ws) {
             this.ws.complete();
             this.ws = null;
@@ -166,5 +172,6 @@ export class WebsocketService {
       this.ws = null;
     }
     this.isConnecting = false;
+    this.connectionStatusSubject$.next(false);
   }
 }

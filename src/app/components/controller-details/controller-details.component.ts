@@ -222,13 +222,13 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
     this.showInfoPopup = true;
     this.toggleSubject.next('INFO');
   }
-
+/*
   onEditOutput(output: any) {
     this.router.navigate(['/output-edit'], { 
       state: { output } 
     });
   }
-
+*/
   showService() {
     this.showServicePopup = true;    
   }

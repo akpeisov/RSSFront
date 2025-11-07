@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AnimationService } from '../../services/animation.service';
 import { WebsocketService } from '../../services/websocket.service';
 import { debounceTime, Subject } from 'rxjs';
 import { Output } from '../../model/io-config';
+import { DataService } from '../../services/data.service';
 
 type NumberField = 'on' | 'off' | 'limit';
 
@@ -17,7 +18,8 @@ type NumberField = 'on' | 'off' | 'limit';
   imports: [CommonModule, FormsModule]
 })
 export class OutputEditComponent implements OnInit {
-  public output: Output = {
+  output: Output = {
+    uuid: "",
     id: 0,
     name: '',
     type: 's',
@@ -25,27 +27,28 @@ export class OutputEditComponent implements OnInit {
     default: 'off',
     state: 'off',
     slaveId: 0
-  };
-  public controllerMac: string = '';
-  public outputTypes = [
+  };  
+  outputTypes = [
     { value: 's', label: 'Обычный' },
     { value: 't', label: 'Тепличный таймер' }
   ];
-  public defaultValues = [
+  defaultValues = [
     { value: 'on', label: 'Включено' },
     { value: 'off', label: 'Выключено' }
   ];
-  public formError: string = '';
-
-  private updateSubject = new Subject<{ payload: any }>();
-
+  formError: string = '';
+  
+  private toggleSubject = new Subject<{ payload:any }>();
+  
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private location: Location,
     private animationService: AnimationService,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
+    private dataService: DataService
   ) {
-    this.updateSubject.pipe(debounceTime(300)).subscribe(({ payload }) => {
+    this.toggleSubject.pipe(debounceTime(300)).subscribe(({ payload }) => {
       this.websocketService.sendMessage({
         type: 'UPDATEOUTPUT',
         payload: payload,
@@ -54,16 +57,16 @@ export class OutputEditComponent implements OnInit {
   }
 
   public ngOnInit(): void {
+    const uuid = this.route.snapshot.paramMap.get('uuid');
     // Get output data from route state
-    const state = history.state;
-    if (state && state.output) {
-      this.output = { ...state.output };
-      this.controllerMac = state.controllerMac;      
-    } else {
-      this.router.navigate(['/']);
+    if (uuid) {
+      this.dataService.getOutputByUuid(uuid).subscribe((output: Output) => {
+        this.output = output;        
+        // console.log('output-edit', this.output);
+      });
     }
   }
-
+  
   public onTypeChange(): void {
     // Reset timer-specific fields when type changes
     if (this.output.type !== 't') {
@@ -105,20 +108,18 @@ export class OutputEditComponent implements OnInit {
     }
 
     console.log('Saving output:', this.output);
-    this.updateSubject.next({ 
-      payload: this.output      
-    });
+    this.toggleSubject.next({ payload: this.output });    
     this.back();
   }
 
   public back(): void {
     this.animationService.triggerLeaveAnimation();
     setTimeout(() => {
-      if (this.controllerMac) {
-        this.router.navigate(['/controller', this.controllerMac]);
+      if (this.output.mac) {
+        this.router.navigate(['/controller', this.output.mac]);
       } else {
         this.location.back();
       }
     }, 150); // Half the animation duration for smoother transition
-  }
+  }  
 }
