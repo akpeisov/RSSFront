@@ -65,7 +65,7 @@
                 <label>Output</label>
                 <select [(ngModel)]="action.outputUuid" (ngModelChange)="onOutputChange(action)">
                   <option *ngFor="let output of outputs" [ngValue]="output.uuid">
-                    {{ output.name }} - {{ output.uuid }}
+                    {{ output.name }}
                   </option>
                 </select>
               </div>
