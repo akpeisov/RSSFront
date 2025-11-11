@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { EMPTY, ReplaySubject, OperatorFunction, timer, BehaviorSubject } from 'rxjs';
 import { catchError, switchAll, tap, switchMap } from 'rxjs/operators';
 import { ErrorService } from './error.service';
+import { ToastrService } from 'ngx-toastr';
 import { KeycloakService } from 'keycloak-angular';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { IHelloMsg } from '../model/hello-msg';
@@ -40,7 +41,8 @@ export class WebsocketService {
 
   constructor(
     private errorService: ErrorService,
-    private keycloak: KeycloakService
+    private keycloak: KeycloakService,
+    private toastr: ToastrService
   ) {
     this.setupTokenRefresh();
   }
@@ -74,6 +76,7 @@ export class WebsocketService {
     } catch (error) {
       console.error('Error scheduling token refresh:', error);
       this.errorService.handle('Failed to schedule token refresh');
+      this.toastr.error('Failed to schedule token refresh', 'WebSocket');
     }
   }
 
@@ -92,6 +95,7 @@ export class WebsocketService {
     } catch (error) {
       console.error('Error refreshing token:', error);
       this.errorService.handle('Failed to refresh token');
+      this.toastr.error('Failed to refresh authentication token', 'WebSocket');
     }
   }
 
@@ -107,6 +111,7 @@ export class WebsocketService {
     console.log('Sending message:', message);
     if (!this.ws) {
       console.error('WebSocket is not initialized');
+      this.toastr.error('Unable to send message: WebSocket is not connected', 'WebSocket');
       return;
     }
     this.ws.next(message);
@@ -140,10 +145,11 @@ export class WebsocketService {
         },
       },
       closeObserver: {
-        next: () => {
-          console.log('WebSocket connection closed, attempting reconnect in 5s');
+        next: (ev: any) => {
+          console.log('WebSocket connection closed, attempting reconnect in 5s', ev);
           this.isConnecting = false;
           this.connectionStatusSubject$.next(false);
+          this.toastr.error('WebSocket connection closed', 'WebSocket');
           if (this.ws) {
             this.ws.complete();
             this.ws = null;
@@ -157,6 +163,8 @@ export class WebsocketService {
       tap(msg => console.log('Raw WebSocket message received:', msg)),
       catchError((e) => {
         console.error('Error in WebSocket stream:', e);
+        this.errorService.handle('WebSocket stream error');
+        this.toastr.error('WebSocket stream error', 'WebSocket');
         return EMPTY;
       })
     );

@@ -1,5 +1,5 @@
 <div class="controller-card" [routerLink]="['/controller', controller.mac]">
-  <span>{{ controller.name }} - {{ controller.description }}</span>
+  <span><span *ngIf="adminRole"><b>{{controller.username}}&nbsp;</b></span>{{ controller.name }} - {{ controller.description }}</span>
   <span class="status">
     <i [class.green]="controller.status === 'online'" [class.red]="controller.status !== 'online'"></i>
   </span>

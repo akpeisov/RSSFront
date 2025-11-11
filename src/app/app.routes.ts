@@ -8,8 +8,7 @@ import { OutputEditComponent } from "./components/output-edit/output-edit.compon
 import { SettingsComponent } from './components/settings/settings.component';
 
 export const routes: Routes = [
-  { path: '', component: ControllerListComponent },
-  //{ path: 'controller/:id', component: ControllerDetailsComponent },
+  { path: '', component: ControllerListComponent },  
   { path: 'controller/:mac', component: ControllerDetailsComponent },
   { path: 'controller/:mac/settings', component: SettingsComponent },
   { path: 'input-edit/:uuid', component: InputEditComponent },  

@@ -10,6 +10,111 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.home-link {
+  text-decoration: none;
+  color: var(--text-color);
+  transition: opacity 0.3s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+}
+
+.test-indicator {
+  background-color: #ff4444;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.add-controller-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--accent-color);
+  /* Use theme-aware text color so icon contrasts on both light and dark themes */
+  color: var(--text-color);
+  /* Keep a subtle border/shadow so button remains visible when accent is light */
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.add-controller-button .icon {
+  stroke: currentColor;
+}
+
+.add-controller-button:hover,
+.add-controller-button:focus {
+  background: color-mix(in srgb, var(--accent-color) 85%, black 15%);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--text-color);
+  border-radius: 4px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: var(--hover-color);
+  }
+
+  .username {
+    font-size: 0.9rem;
+  }
+}
+/*
+.app-container {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+}
+
+.app-header {
+  background-color: var(--bg-secondary);
+  padding: 1rem;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   
   .home-link {
     text-decoration: none;
@@ -75,5 +180,6 @@
         background-color: var(--hover-color);
       }
     }
-  }
+  }    
 }
+  */

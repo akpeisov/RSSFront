@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { RouterLink } from "@angular/router";
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-controller-card',
@@ -13,5 +14,19 @@ import { CommonModule } from '@angular/common';
   ]
 })
 export class ControllerCardComponent {
-  @Input() controller: any;
+  @Input() controller: any;  
+  adminRole: boolean = false;
+  userProfile: any;
+
+  constructor(private auth: AuthService) {}
+
+  ngOnInit() {
+    this.auth.isAdmin$.subscribe((data) => {      
+      this.adminRole = data;
+    });
+    this.auth.getUserProfile$.subscribe((data) => {      
+      this.userProfile = data;
+    });
+
+  }
 }
