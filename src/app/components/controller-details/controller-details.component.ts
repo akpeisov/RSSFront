@@ -42,6 +42,7 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   showRebootConfirm = false;
   showUpdateConfirm = false;
   showUploadConfirm = false;  
+  showDeleteConfirm = false;
   private toggleSubject = new Subject<any>();
   private websocketSubscription: Subscription | null = null;
   public formError: string = '';
@@ -216,6 +217,12 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
 
   confirmUpload() {
     this.toggleSubject.next('UPLOADCONFIG');
+    this.cancelDialog();
+  }
+
+  confirmDelete() {
+    this.toggleSubject.next('DELETE');
+    this.cancelDialog();
   }
 
   showInfo(): void {
@@ -296,5 +303,11 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
     this.showRebootConfirm = false;
     this.showUpdateConfirm = false;
     this.showUploadConfirm = false;
+    this.showDeleteConfirm = false;
+  }
+
+  onMenuDelete() {
+    this.actionsMenuOpen = false;
+    this.showDeleteConfirm = true;
   }
 }

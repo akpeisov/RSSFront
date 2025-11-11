@@ -27,6 +27,7 @@
             <li (click)="onMenuReboot()">Reboot</li>
             <li (click)="onMenuUpdate()">Update</li>
             <li (click)="onMenuLogs()">Logs</li>            
+            <li (click)="onMenuDelete()">!!!Delete!!!</li>            
           </ul>
         </div>
       </div>
@@ -164,6 +165,7 @@
           <p><span>Ethernet IP</span> <span>{{ controller?.ethIP }}</span></p>
           <p><span>WiFi IP</span> <span>{{ controller?.wifiIP }}</span></p>
           <p><span>WiFi RSSI</span> <span>{{ controller?.wifiRSSI }}</span></p>
+          <p><span>Reset Reason</span> <span>{{ controller?.resetReason }}</span></p>
         </div>
         <button class="action-buttons" (click)="showInfo()">Refresh</button>
       </div>
@@ -198,6 +200,17 @@
     <div class="modal-title">Are you sure to upload config in controller?</div>
     <div class="modal-actions">
       <button (click)="confirmUpload()">Yes</button>
+      <button (click)="cancelDialog()">No</button>
+    </div>
+  </div>
+</div>
+
+<!-- Диалог подтверждения Delete -->
+<div class="popup-overlay" *ngIf="showDeleteConfirm">
+  <div class="modal-dialog">
+    <div class="modal-title">Are you sure to DELETE controller?</div>
+    <div class="modal-actions">
+      <button (click)="confirmDelete()">Yes</button>
       <button (click)="cancelDialog()">No</button>
     </div>
   </div>
