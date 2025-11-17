@@ -33,12 +33,14 @@ export class SettingsComponent implements OnInit {
     this.mac = this.route.snapshot.paramMap.get('mac') || '';
     //this.availableMaster = (this.dataService.controllers || []).filter((ctrl: any) => ctrl.modbus?.mode !== 'slave');
     this.dataService.getControllerByMacWithFetch(this.mac).subscribe((config) => {
-      //console.log('Fetched', config)
+      console.log('Fetched', config)
       // Корректная инициализация config и всех вложенных объектов
       const emptyConfig: ControllerConfig = {
         mac: this.mac,
+        name: '',
+        description: '',
         modbus: {
-          mode: 'none',
+          mode: 'none',          
           pollingTime: 100,
           readTimeout: 200,
           maxRetries: 3,
@@ -64,6 +66,8 @@ export class SettingsComponent implements OnInit {
         // Если config пришёл, дополняем недостающие объекты
         this.config = {
           mac: config.mac ?? this.mac,
+          name: config.name,
+          description: config.description,
           modbus: { ...emptyConfig.modbus, ...(config.modbus ?? {}) },
           network: {
             ...emptyConfig.network,
@@ -80,17 +84,7 @@ export class SettingsComponent implements OnInit {
       this.initModbusConfig();
     });
   }
-    // toggleDow(task: any, day: number) {
-    //   if (!Array.isArray(task.dow)) task.dow = [];
-    //   const idx = task.dow.indexOf(day);
-    //   if (idx > -1) {
-    //     task.dow.splice(idx, 1);
-    //   } else {
-    //     task.dow.push(day);
-    //     task.dow.sort();
-    //   }
-    // }
-
+    
   toggleDow(task: any, day: number) {
     if (!Array.isArray(task.dow)) task.dow = [];
     const idx = task.dow.indexOf(day);

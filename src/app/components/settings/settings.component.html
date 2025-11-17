@@ -8,6 +8,16 @@
 
   <div *ngIf="config">
     <div class="settings-form">
+      <h4>MAC {{config.mac}}</h4>
+      <div class="settings-panel">
+        <label>Name
+          <input type="text" [(ngModel)]="config.name" />
+        </label>
+        <label>Description
+          <input type="text" [(ngModel)]="config.description" />
+        </label>
+      </div>
+
       <h2>Network Settings</h2>
       <div class="settings-panel">
         <div class="modal-body">

@@ -50,7 +50,21 @@
   <!-- Desktop View -->
   <div class="desktop-view">
     <h3 class="section-title">Outputs</h3>
+
     <div class="outputs-container">
+      <ng-container *ngFor="let slaveGroup of outputsBySlaveGroups | keyvalue; trackBy: trackByGroupKey">
+        <div class="slave-divider" *ngIf="slaveGroup.key !== '0'">
+          <span class="slave-label">Slave ID: {{ slaveGroup.key }}</span>
+        </div>
+        <app-output-card *ngFor="let output of slaveGroup.value; trackBy: trackByOutput"
+                        [output]="output"
+                        [ngClass]="output.state"
+                        [mac]="controller?.mac">
+        </app-output-card>
+      </ng-container>
+    </div>
+
+    <!-- <div class="outputs-container">
       <ng-container *ngFor="let slaveGroup of getOutputsBySlaveId() | keyvalue">
         <div class="slave-divider" *ngIf="slaveGroup.key !== '0'">
           <span class="slave-label">Slave ID: {{ slaveGroup.key }}</span>
@@ -58,11 +72,9 @@
         <app-output-card *ngFor="let output of slaveGroup.value" 
                          [output]="output" 
                          [mac]="controller?.mac">
-                         <!-- (edit)="onEditOutput($event)" -->
-                         
         </app-output-card>
       </ng-container>
-    </div>
+    </div> -->
 
     <h3 class="section-title">Inputs</h3>
     <div class="inputs-container">

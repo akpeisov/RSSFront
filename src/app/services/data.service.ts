@@ -36,18 +36,18 @@ export class DataService {
   }
 
   updateControllerIO(data: IUpdateIOMsg): void {
-    console.log(this.controllers)
+    //console.log(this.controllers)
     const controller = this.controllers.find(ctrl => ctrl.mac === data.mac);
-    if (controller) {
+    if (controller) {      
       const output = controller.io.outputs.find((outputItem: any) => outputItem.id === data.output && (outputItem.slaveId ?? 0) === (data.slaveId ?? 0));
       const input = controller.io.inputs.find((inputItem: any) => inputItem.id === data.input && (inputItem.slaveId ?? 0) === (data.slaveId ?? 0));
       if (output) {
         output.state = data.state;
         output.timer = data.timer;
-        console.log(`Output updated: MAC=${data.mac}, Output=${data.output}, State=${data.state}, Timer=${data.timer}`);
+        // console.log(`Output updated: MAC=${data.mac}, Output=${data.output}, State=${data.state}, Timer=${data.timer}`);
       } else if (input) {
         input.state = data.state;        
-        console.log(`Input updated: MAC=${data.mac}, Input=${data.input}, State=${data.state}`);
+        // console.log(`Input updated: MAC=${data.mac}, Input=${data.input}, State=${data.state}`);
       } else {
         console.log(`Output or input not found: MAC=${data.mac}, Output=${data.output}, Input=${data.input}, SlaveId=${data.slaveId}`);
       }

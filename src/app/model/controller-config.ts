@@ -5,6 +5,8 @@ import { SchedulerConfig } from "./scheduler-config";
 
 export interface ControllerConfig {
     mac: string,
+    name: string,
+    description: string,
     modbus: ModbusConfig,
     network: NetworkConfig,
     scheduler: SchedulerConfig,

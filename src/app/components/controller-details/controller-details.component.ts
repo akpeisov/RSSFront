@@ -46,6 +46,7 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   private toggleSubject = new Subject<any>();
   private websocketSubscription: Subscription | null = null;
   public formError: string = '';
+  outputsBySlaveGroups: { [key: string]: any[] } = {};
 
   constructor(private route: ActivatedRoute,
               private router: Router,
@@ -159,6 +160,7 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   private loadController(mac: string) {
     this.dataService.getControllerByMacWithFetch(mac).subscribe((controller) => {
       this.controller = controller;
+      this.buildOutputsBySlaveId();
       if (this.controller?.io.outputs) {
         this.controller.io.outputs.sort((a: any, b: any) => {
           if (a.slaveId !== b.slaveId) {
@@ -309,5 +311,24 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   onMenuDelete() {
     this.actionsMenuOpen = false;
     this.showDeleteConfirm = true;
+  }
+
+  private buildOutputsBySlaveId() {
+    const map: { [k: string]: any[] } = {};
+    const outputs = this.controller?.io?.outputs ?? [];
+    for (const o of outputs) {
+      const sid = String(o.slaveId ?? 0);
+      if (!map[sid]) map[sid] = [];
+      map[sid].push(o);
+    }
+    this.outputsBySlaveGroups = map;
+  }
+
+  trackByOutput(index: number, item: any) {
+    return (item?.uuid ?? item?.id ?? index) + '_' + item.state + "_" + item.timer;
+  }
+
+  trackByGroupKey(index: number, item: { key: string, value: any[] }) {
+    return item?.key ?? index;
   }
 }
