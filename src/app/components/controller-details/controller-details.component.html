@@ -1,11 +1,18 @@
 <div class="controller-container">
   <div class="controller-header">
     <div class="header-main">
-      <div class="title-section">
+      <div class="title-section border: 1px solid red;">
         <span class="status-indicator">
           <i [class.online]="controller?.status === 'online'" [class.offline]="controller?.status !== 'online'"></i>
         </span>
-        <h2>{{ controller?.name }}</h2>
+        <div class="controller-info">
+          <h2>{{ controller?.name }}</h2>
+          <span
+            class="detail"
+            *ngIf="controller?.status !== 'online'"
+            >Last seen: {{ controller?.lastSeen | date: 'dd.MM.yyyy HH:mm:ss' }}</span
+          >
+        </div>
       </div>
       <div class="action-buttons">
         <div>
@@ -107,7 +114,7 @@
            'slide-left': getTabAnimationClass('outputs') === 'slide-left'
          }">
       <div class="outputs-container">
-        <ng-container *ngFor="let slaveGroup of getOutputsBySlaveId() | keyvalue">
+        <ng-container *ngFor="let slaveGroup of getOutputsBySlaveId() | keyvalue; trackBy: trackByOutput">
           <div class="slave-divider" *ngIf="slaveGroup.key !== '0'">
             <span class="slave-label">Slave ID: {{ slaveGroup.key }}</span>
           </div>

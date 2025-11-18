@@ -149,11 +149,22 @@
         gap: 12px;
         line-height: 1;
 
+        .controller-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
         h2 {
           margin: 0;
           color: var(--text-color);
           font-size: 1.5rem;
           line-height: 1;
+        }
+
+        .detail {
+          display: block;
+          color: red;
         }
 
         .status-indicator {

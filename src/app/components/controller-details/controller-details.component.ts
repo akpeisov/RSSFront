@@ -3,7 +3,7 @@ import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import {DataService} from "../../services/data.service";
 import {OutputCardComponent} from "../output-card/output-card.component";
 import {InputCardComponent} from "../input-card/input-card.component";
-import {NgFor, NgClass, NgIf, KeyValuePipe} from "@angular/common";
+import {NgFor, NgClass, NgIf, KeyValuePipe, DatePipe} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {ButtonCardComponent} from "../button-card/button-card.component";
 import {debounceTime, Subject, Subscription} from "rxjs";
@@ -26,7 +26,8 @@ import { RouterModule } from '@angular/router';
     FormsModule,
     ButtonCardComponent,
     AnsiColorPipe,
-    RouterModule    
+    RouterModule,
+    DatePipe
   ]
 })
 export class ControllerDetailsComponent implements OnInit, OnDestroy {
