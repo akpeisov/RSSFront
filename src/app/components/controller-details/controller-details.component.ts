@@ -184,7 +184,7 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
     this.websocketSubscription = this.websocketService.messages$.pipe(
       filter((message: any) =>
         (message.type === 'INFO' && message.payload?.mac === this.controller?.mac) ||
-        (message.type === 'LOG') || (message.type === 'SUCCESS')
+        (message.type === 'LOG') || (message.type === 'SUCCESS') || (message.type === 'STATUS')
       )
     ).subscribe((message: any) => {
       console.log('Controller-details ', message);
@@ -195,16 +195,22 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
           ...message.payload
         };
         console.log('Controller info updated:', message.payload);
-      }
-      if (message.type === 'LOG' && message.payload) {
+      } else if (message.type === 'LOG' && message.payload) {
         const newLines = Array.isArray(message.payload)
           ? "test"//message.payload
           : String(message.payload.replace('\n', '') ).split('\n');
         this.logs = [...this.logs, ...newLines];
-      }
-      if (message.type === 'SUCCESS') {
+      } else if (message.type === 'SUCCESS') {
         if (this.showUploadConfirm)
           this.showUploadConfirm = false;        
+      } else if (message.type === 'STATUS') {        
+        const mac = message?.payload?.mac;
+        const status = message?.payload?.status;        
+        if (mac == this.controller?.mac)
+          this.controller.status = status;
+          if (status === "offline") {
+            this.controller.lastSeen = new Date();
+          }
       }
     });
   }

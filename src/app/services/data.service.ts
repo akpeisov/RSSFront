@@ -25,7 +25,7 @@ export class DataService {
   getUserDevices(): Observable<any> {
     return this.http.get(this.apiUrl).pipe(
       tap((data: any) => {
-        console.log('getUserDevices', data);
+        //console.log('getUserDevices', data);
         this.setControllers(data);
       })
     );

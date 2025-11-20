@@ -21,6 +21,7 @@ export class SettingsComponent implements OnInit {
   formError: string = '';
   mac: string = '';
   config: ControllerConfig | null = null;
+  hwParamsEntries: Array<{ key: string; value: string }> = [];
 
   constructor(private dataService: DataService, 
               private route: ActivatedRoute,
@@ -39,6 +40,7 @@ export class SettingsComponent implements OnInit {
         mac: this.mac,
         name: '',
         description: '',
+        hwParams: '',
         modbus: {
           mode: 'none',          
           pollingTime: 100,
@@ -67,6 +69,7 @@ export class SettingsComponent implements OnInit {
         this.config = {
           mac: config.mac ?? this.mac,
           name: config.name,
+          hwParams: config.hwParams,
           description: config.description,
           modbus: { ...emptyConfig.modbus, ...(config.modbus ?? {}) },
           network: {
@@ -82,7 +85,72 @@ export class SettingsComponent implements OnInit {
         };
       }
       this.initModbusConfig();
+      // parse hwParams into entries for the form
+      this.parseHwParams();
     });
+  }
+
+  private parseHwParams() {
+    this.hwParamsEntries = [];
+    if (!this.config) return;
+    const raw = this.config.hwParams;
+    if (!raw) return;
+    try {
+      const obj = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (obj && typeof obj === 'object') {
+        for (const k of Object.keys(obj)) {
+          this.hwParamsEntries.push({ key: k, value: String(obj[k]) });
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to parse hwParams JSON', e);
+    }
+  }
+
+  addHwParam() {
+    this.hwParamsEntries.push({ key: '', value: '' });
+  }
+
+  removeHwParam(i: number) {
+    this.hwParamsEntries.splice(i, 1);
+  }
+
+  private serializeHwParams(): void {
+    if (!this.config) return;
+    const obj: any = {};
+    for (const e of this.hwParamsEntries) {
+      if (!e.key) continue;
+      obj[e.key] = this.parseHwParamValue(e.value);
+    }
+    try {
+      this.config.hwParams = JSON.stringify(obj);
+    } catch (e) {
+      console.warn('Failed to serialize hwParams', e);
+      this.config.hwParams = '';
+    }
+  }
+
+  private parseHwParamValue(val: string): any {
+    if (val === null || val === undefined) return val;
+    const s = String(val).trim();
+    if (s === '') return '';
+    // boolean
+    if (s.toLowerCase() === 'true') return true;
+    if (s.toLowerCase() === 'false') return false;
+    // number
+    if (!isNaN(Number(s))) {
+      // decide int vs float
+      return s.indexOf('.') === -1 ? parseInt(s, 10) : parseFloat(s);
+    }
+    // JSON object/array
+    if ((s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'))) {
+      try {
+        return JSON.parse(s);
+      } catch {
+        return s;
+      }
+    }
+    return s;
   }
     
   toggleDow(task: any, day: number) {
@@ -236,6 +304,8 @@ export class SettingsComponent implements OnInit {
     if (!this.validateConfig()) {
       return;
     }
+    // serialize hwParams into config.hwParams before sending
+    this.serializeHwParams();
     this.websocketService.sendMessage({
       type: 'DEVICECONFIG',
       payload: this.config      

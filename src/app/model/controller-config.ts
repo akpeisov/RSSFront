@@ -10,5 +10,6 @@ export interface ControllerConfig {
     modbus: ModbusConfig,
     network: NetworkConfig,
     scheduler: SchedulerConfig,
-    io: IOConfig
+    io: IOConfig,
+    hwParams: string
 }

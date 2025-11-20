@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy } from '@angular/core';
 import { FormsModule } from "@angular/forms";
 import { debounceTime, Subject } from "rxjs";
 import { WebsocketService } from "../../services/websocket.service";
@@ -15,13 +15,14 @@ import { Router } from '@angular/router';
     NgIf
   ]
 })
-export class OutputCardComponent implements OnDestroy, OnChanges {
+export class OutputCardComponent implements OnDestroy {
   @Input() output: any;
   @Input() mac: any;
   
   private toggleSubject = new Subject<{ output: number, action: string, slaveId: number }>();
   private toggleSub: any;
   outputChecked: boolean = false; 
+  private gotReply: boolean = true;
 
   constructor(private websocketService: WebsocketService,
               private router: Router) {
@@ -35,22 +36,13 @@ export class OutputCardComponent implements OnDestroy, OnChanges {
 
   ngOnInit(): void {
     this.outputChecked = this.output.state === 'on';    
+    this.gotReply = true;    
   }
-  
-  ngOnChanges(changes: SimpleChanges): void {
-    //console.log('changes', changes);
-    const ch = changes['output'];
-    if (!ch) return;
-    
-    //this.outputChecked = ch.currentValue.state === 'on';
-    //console.log(this.output.id, this.outputChecked );        
-  }
-
+ 
   onToggle(event: Event): void {
-    event.stopPropagation();
-    // берем новое значение из таргета
+    event.stopPropagation();    
     const checked = (event.target as HTMLInputElement).checked;
-    this.outputChecked = checked; // обновляем локально для UI
+    this.outputChecked = checked;
 
     if (!this.output) return;
 
@@ -58,8 +50,14 @@ export class OutputCardComponent implements OnDestroy, OnChanges {
     const outputId = this.output.id;
     const slaveId = this.output.slaveId ?? 0;
 //console.log({ output: outputId, action: newState, slaveId });
-    // Отправляем действие на сервер — не мутируем входной объект
+    this.gotReply = false;
     this.toggleSubject.next({ output: outputId, action: newState, slaveId });
+    setTimeout(() => {
+      // если нет ответа то возвращаем предыдущее значение
+      if (!this.gotReply) {        
+        this.outputChecked = !this.outputChecked;
+      }
+    }, 1500);
   }
 
   onEdit(): void {

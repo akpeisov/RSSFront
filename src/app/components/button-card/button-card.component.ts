@@ -30,7 +30,7 @@ export class ButtonCardComponent {
     private router: Router,
     private route: ActivatedRoute
   ) {
-    this.toggleSubject.pipe(debounceTime(300)).subscribe(({ input, action }) => {
+    this.toggleSubject.pipe(debounceTime(100)).subscribe(({ input, action }) => {
       this.websocketService.sendMessage({
         type: 'ACTION',
         payload: { mac: this.mac, input, action },

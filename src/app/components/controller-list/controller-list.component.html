@@ -1,4 +1,4 @@
-<div *ngIf="controllers.length === 0" class="empty-state">
+<div *ngIf="sortedControllers.length === 0" class="empty-state">
   <div class="empty-icon">📱</div>
   <h3>No controllers found</h3>
   <p>There are no any linked controllers, try to link it...</p>
@@ -14,8 +14,8 @@
   <span style="margin-left:8px;font-weight:600;">You're offline</span>
 </div>
 
-<div *ngIf="controllers.length > 0">
-  <div *ngFor="let controller of controllers">
+<div *ngIf="sortedControllers.length > 0">
+  <div *ngFor="let controller of sortedControllers">
     <app-controller-card [controller]="controller"></app-controller-card>
   </div>
 </div>
