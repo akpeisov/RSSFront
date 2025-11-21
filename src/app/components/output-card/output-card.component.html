@@ -1,8 +1,17 @@
 <div class="output-card">
-  <span>{{ output.name }}</span>
-  <span *ngIf="output.timer > 0">{{ output.timer }}</span>
-  <label class="switch">
-    <input type="checkbox" [checked]="output.state === 'on'" (change)="onChange($event)" />
-    <span class="slider round"></span>
-  </label>
+    <span class="output-name">{{ output.name }}</span>
+    <span class="output-timer" *ngIf="output.timer > 0">Timer: {{ output.timer }}s</span>
+    <div class="output-actions">
+      <button class="edit-button" (click)="onEdit()">
+        <img src="assets/icons/edit.svg" width="20" height="20" alt="Edit" />
+      </button>
+      <label class="switch" (click)="$event.stopPropagation()">
+        <input
+          type="checkbox"
+          [checked]="outputChecked"
+          (click)="onToggle($event)"
+        />
+        <span class="slider"></span>
+      </label>
+    </div>
 </div>

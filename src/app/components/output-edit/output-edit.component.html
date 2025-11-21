@@ -1,60 +1,85 @@
-<div class="input-edit">
-  <button (click)="back()"><-</button>
-  <h2>Редактирование выхода</h2>
-  <label>
-    Имя выхода
-    <input type="text" [(ngModel)]="output.name" />
-  </label>
-  <label>
-    Тип выхода
-    <select id="type" [(ngModel)]="output.type" class="form-control" (change)="updateEvents()">
-      <option value="">Обычный</option>
-      <option value="SW">Тепличный таймер</option>
-      <option value="INVSW">Одноразовый</option>
-    </select>
-  </label>
+<div class="output-edit-container">
+  <div class="header">
+    <button class="back-button" (click)="back()">
+      <img src="assets/icons/arrow-back.svg" width="24" height="24" alt="Back" />
+    </button>
+    <h2>Output configuration</h2>
+  </div>
 
-  <h3>События</h3>
+  <div class="output-edit-form">
+    <div class="form-group">
+      <label for="name">Output Id {{output.id}}
+        <span *ngIf="output.slaveId != 0"> Slave Id {{output.slaveId}}</span></label>      
+    </div>
+    <div class="form-group">
+      <label for="name">Имя выхода</label>
+      <input type="text" id="name" [(ngModel)]="output.name" />
+    </div>
 
-  <div *ngFor="let event of input.events; let i = index">
-    <div class="event-card">
-      <h4>Event {{ event.event }}</h4>
-      <div *ngFor="let action of event.actions; let j = index">
-        <div class="action-card">
-          <label>Выход:</label>
-          <select [(ngModel)]="action.outputID"
-                  (ngModelChange)="onOutputChange(action)">
-            <option *ngFor="let output of outputs"
-                    [ngValue]="output.outputID">
-              {{ output.name }}
-            </option>
-          </select>
+    <div class="form-group">
+      <label for="type">Тип выхода</label>
+      <select id="type" [(ngModel)]="output.type" (ngModelChange)="onTypeChange()">
+        <option *ngFor="let type of outputTypes" [value]="type.value">
+          {{ type.label }}
+        </option>
+      </select>
+    </div>
 
-          <label>Действие:</label>
-          <select [(ngModel)]="action.action">
-            <option value="on">Вкл</option>
-            <option value="off">Выкл</option>
-            <option value="toggle">Переключить</option>
-          </select>
-
-          <div *ngIf="action.action == 'on'">
-            <label>Длительность (сек):</label>
-            <input type="number" [(ngModel)]="action.duration" />
-          </div>
-          <button class="btn-remove" (click)="removeAction(i, j)">-</button>
-        </div>
+    <!-- Timer-specific fields -->
+    <div class="form-group" *ngIf="output.type === 't'">
+      <label for="on">On Time (seconds)</label>
+      <div class="number-input-group">
+        <button class="number-btn" (click)="decrementValue('on')">-</button>
+        <input type="number" id="on" [(ngModel)]="output.on" min="0" />
+        <button class="number-btn" (click)="incrementValue('on')">+</button>
       </div>
-      <button class="btn-add" (click)="addAction(i)">+</button>
+    </div>
+
+    <div class="form-group" *ngIf="output.type === 't'">
+      <label for="off">Off Time (seconds)</label>
+      <div class="number-input-group">
+        <button class="number-btn" (click)="decrementValue('off')">-</button>
+        <input type="number" id="off" [(ngModel)]="output.off" min="0" />
+        <button class="number-btn" (click)="incrementValue('off')">+</button>
+      </div>
+    </div>
+
+    <!-- Standard output fields -->
+    <div class="form-group" *ngIf="output.type === 's'">
+      <label for="limit">Limit (seconds)</label>
+      <div class="number-input-group">
+        <button class="number-btn" (click)="decrementValue('limit')">-</button>
+        <input type="number" id="limit" [(ngModel)]="output.limit" min="0" />
+        <button class="number-btn" (click)="incrementValue('limit')">+</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="default">Значение при включении</label>
+      <select id="default" [(ngModel)]="output.default">
+        <option *ngFor="let value of defaultValues" [value]="value.value">
+          {{ value.label }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group inline">
+      <label for="alice">Alice</label>
+      <label class="switch">
+        <input type="checkbox" id="alice" [(ngModel)]="output.alice" (ngModelChange)="onAliceChange()" />
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <div class="form-group" *ngIf="output.alice">
+      <label for="room">Room Name</label>
+      <input type="text" id="room" [(ngModel)]="output.room" required />
+      <div class="error-message" *ngIf="formError">{{ formError }}</div>
+    </div>
+
+    <div class="actions">      
+      <button class="save-button" (click)="save()">Save</button>
     </div>
   </div>
 
-
-  <!--  <button (click)="addEvent()">+</button>-->
-  <!--  <div *ngFor="let event of input.events">-->
-  <!--    <h4>{{ event.event }}</h4>-->
-  <!--      <div *ngFor="let action of event.actions">-->
-  <!--        <h4>{{ action.output }} {{ action.action }}</h4>-->
-  <!--      </div>-->
-  <!--  </div>-->
-  <button (click)="save()">Сохранить</button>
 </div>

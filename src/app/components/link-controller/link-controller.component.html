@@ -1,3 +1,20 @@
-<p>Link controller page</p>
-<input type="text" [(ngModel)]="mac" />
-<button class="btn" (click)="link()">Link</button>
+<div class="link-controller-container">
+	<div class="header">
+		<button class="back-button" (click)="back()" title="Back">
+			<img src="assets/icons/arrow-back.svg" width="24" height="24" alt="Back" />
+		</button>
+		<h2>Link Controller</h2>
+	</div>
+
+	<div class="link-form">
+		<div class="form-group">
+			<label for="mac">Controller MAC</label>
+			<input id="mac" type="text" [(ngModel)]="mac" placeholder="Enter controller MAC (or leave as 0)" />
+		</div>
+
+		<div class="form-actions">
+			<button class="cancel-button" (click)="back()">Back</button>
+			<button class="save-button" (click)="link()">Link</button>
+		</div>
+	</div>
+</div>

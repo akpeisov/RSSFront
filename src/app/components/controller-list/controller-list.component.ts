@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import {DataService} from "../../services/data.service";
 import {Router} from "@angular/router";
+import { WebsocketService } from '../../services/websocket.service';
+import { filter, Subscription } from 'rxjs';
 import {ControllerCardComponent} from "../controller-card/controller-card.component";
 import {HttpClientModule} from "@angular/common/http";
-import {NgFor} from "@angular/common";
-
+import {NgFor, NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-controller-list',
@@ -13,21 +14,68 @@ import {NgFor} from "@angular/common";
   standalone: true,
   imports: [ControllerCardComponent,
     HttpClientModule,
-    NgFor
+    NgFor, NgIf
   ]
 })
-export class ControllerListComponent implements OnInit {
+
+export class ControllerListComponent implements OnInit, OnDestroy {  
   controllers: any[] = [];
-
+  sortedControllers: any[] = [];
+  isOnline: boolean = false;
+  private connSub: Subscription | null = null;
+  private msgSub: Subscription | null = null;
+  
   constructor(private dataService: DataService,
-              private router: Router) {}
+              private router: Router,
+              private websocketService: WebsocketService) {}
 
-  ngOnInit() {
-    console.log('controller-list component init')
-    this.dataService.getUserDevices().subscribe((data) => {
-      this.controllers = data;
-      console.log(this.controllers)
+  ngOnInit() {    
+    // Subscribe to websocket connection status
+    this.connSub = this.websocketService.isConnected$.subscribe((status: boolean) => {
+      this.isOnline = status;
+      if (status == true) {
+        this.getUserDevices();
+      }
     });
+
+    // Subscribe to WebSocket messages to update controller status
+    this.msgSub = this.websocketService.messages$.pipe(
+      filter((message: any) => message && message.type === 'STATUS')
+    ).subscribe((message: any) => {
+      const mac = message?.payload?.mac;
+      const status = message?.payload?.status;
+      if (!mac) return;
+
+      // Find controller in controllers list by mac
+      const idx = this.controllers.findIndex((c: any) => c && (c.mac === mac || c.deviceMac === mac));
+      if (idx !== -1) {
+        // Mutate the existing object so other references update automatically
+        this.controllers[idx].status = status;
+        // If we maintain a separate sorted view, ensure it reflects the change as well
+        const sidx = this.sortedControllers.findIndex((c: any) => c && (c.mac === mac || c.deviceMac === mac));
+        if (sidx !== -1) {
+          this.sortedControllers[sidx].status = status;
+        }
+      }
+    });      
+  }
+
+  getUserDevices() {
+    this.dataService.getUserDevices().subscribe((data) => {
+      this.controllers = data || [];
+      // maintain a separately sorted view to avoid sorting in template
+      this.sortedControllers = [...this.controllers].sort((a: any, b: any) => {
+        const an = (a && a.name) ? String(a.name) : '';
+        const bn = (b && b.name) ? String(b.name) : '';
+        return an.localeCompare(bn);
+      });
+      //console.log(this.controllers);
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.connSub) this.connSub.unsubscribe();
+    if (this.msgSub) this.msgSub.unsubscribe();
   }
 
   goToDetails(mac: string) {

@@ -1,8 +1,17 @@
 <div class="button-card">
   <span>{{ input.name }}</span>
-  <button class="settings-button" (click)="onEdit()">
-    <img src="assets/icons/settings-icon.svg" alt="Edit" />
-  </button>
-  <button class="ios-button" (click)="onClick()">
-  </button>
+    <button class="settings-button" (click)="onEdit()" title="Edit button">
+      <img src="assets/icons/edit.svg" width="20" height="20" alt="Edit" />
+    </button>
+    <button class="flat-btn"
+            (mousedown)="onButtonDown()"
+            (mouseup)="onButtonUp()"
+            (mouseleave)="onButtonUp()"
+            (touchstart)="onButtonDown()"
+            (touchend)="onButtonUp()">
+      <div class="progress-bar" *ngIf="isHolding">
+        <div class="progress" [style.width.%]="progress"></div>
+      </div>
+      Press
+    </button>
 </div>

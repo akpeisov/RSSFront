@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - test
+
+jobs:
+  build:
+
+    # using Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4 #this installs node and npm for us
+      with:
+        node-version: '22.12.x'
+
+    - uses: actions/cache@v3 # this allows for re-using node_modules caching, making builds a bit faster.
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - run: npm install
+    - run: npm install -g @angular/cli > /dev/null
+    - run: ng build --configuration test
+    - run: ls -lR /home/runner/work/RSSFront/RSSFront/dist
+
+    - name: copy file via ssh key
+      uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      with:
+        server: akpeisov.kz
+        username: cicd_web
+        ssh_private_key: ${{ secrets.AKPEISOVKZ }}
+        local_path: "dist/rssfront/browser/"
+        remote_path: "/var/www/test.akpeisov.kz/"
+        sftp_only: true

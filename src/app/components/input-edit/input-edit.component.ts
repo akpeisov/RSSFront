@@ -5,27 +5,36 @@ import {DataService} from "../../services/data.service";
 import {NgForOf, NgIf} from "@angular/common";
 import {debounceTime, Subject} from "rxjs";
 import {WebsocketService} from "../../services/websocket.service";
+import { Location } from '@angular/common';
+import { AnimationService } from '../../services/animation.service';
 
 @Component({
   selector: 'app-input-edit',
   templateUrl: './input-edit.component.html',
   styleUrls: ['./input-edit.component.scss'],
-  imports: [
-    FormsModule,
-    NgForOf,
-    NgIf
-  ],
-  standalone: true
+  standalone: true,
+  imports: [FormsModule, NgForOf, NgIf]
 })
 
 export class InputEditComponent implements OnInit {
   input: any;
   outputs: any[] = [];
+  controllerMac: string | null = null;
+  deletingAction: { eventIndex: number, actionIndex: number } | null = null;
+  addingAction: { eventIndex: number, actionIndex: number } | null = null;
+  swappingActions: { eventIndex: number, from: number, to: number, direction: 'up' | 'down' } | null = null;
+  isBtn: boolean = false;
 
-  private toggleSubject= new Subject<{ payload:any }>();
+  private toggleSubject = new Subject<{ payload:any }>();
 
-  constructor(private router: Router, private route: ActivatedRoute, private dataService: DataService,
-              private websocketService: WebsocketService) {
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private dataService: DataService,
+    private websocketService: WebsocketService,
+    private location: Location,
+    private animationService: AnimationService
+  ) {
     this.toggleSubject.pipe(debounceTime(300)).subscribe(({ payload }) => {
       this.websocketService.sendMessage({
         type: 'UPDATEINPUT',
@@ -36,80 +45,163 @@ export class InputEditComponent implements OnInit {
 
   ngOnInit(): void {
     const uuid = this.route.snapshot.paramMap.get('uuid');
-    console.log('uuid', uuid)
     if (uuid) {
       this.dataService.getInputByUuid(uuid).subscribe((input) => {
         this.input = input;
-        console.log('input-edit', this.input)
+        this.controllerMac = input.mac;
+        this.updateEvents();
+        //console.log('input-edit', this.input);                
       });
 
       this.dataService.getOutputsByInputUuid(uuid).subscribe((outputs) => {
         this.outputs = outputs;
-        console.log('outputs', this.outputs)
+        console.log('outputs', this.outputs);
       });
-    }
-  }
-
-  getActions(type: string): string[] {
-    switch (type) {
-      case 'SW':
-        return ['on', 'off'];
-      case 'INWSW':
-      case 'BTN':
-        return ['toggle'];
-      default:
-        return [];
-    }
+    }    
   }
 
   updateEvents(): void {
-    // Обновление списка событий на основе типа входа
-    const eventMap = {
-      BTN: ['press', 'long press'],
-      SW: ['on', 'off'],
-      INVSW: ['toggle'],
-    };
-
+    // Для INVSW: только toggle
+    if (this.input.type === 'INVSW') {
+      const toggleActions = this.input.events?.find((e: { event: string }) => e.event === 'toggle')?.actions || [];
+      this.input.events = [{ event: 'toggle', actions: toggleActions }];
+    } else if (this.input.type === 'SW') {
+      // Для SW: on и off
+      let onActions = this.input.events?.find((e: { event: string }) => e.event === 'on')?.actions || [];
+      let offActions = this.input.events?.find((e: { event: string }) => e.event === 'off')?.actions || [];
+      this.input.events = [
+        { event: 'on', actions: onActions },
+        { event: 'off', actions: offActions }
+      ];
+    } else if (this.input.type === 'BTN') {
+      // Для BTN: toggle и longpress
+      let toggleActions = this.input.events?.find((e: { event: string }) => e.event === 'toggle')?.actions || [];
+      let longpressActions = this.input.events?.find((e: { event: string }) => e.event === 'longpress')?.actions || [];
+      this.input.events = [
+        { event: 'toggle', actions: toggleActions },
+        { event: 'longpress', actions: longpressActions }
+      ];
+    }
   }
-
+  
   addAction(eventIndex: number): void {
-    // Добавление нового действия в событие
     const actions = this.input.events[eventIndex].actions;
-
-    // Найти максимальное значение order среди текущих действий
     const maxOrder = actions.reduce((max: number, action: any) => {
       return action.order > max ? action.order : max;
-    }, -1); // -1 чтобы первый элемент получил order = 0
+    }, -1);
+
+    // Set default action based on input type and event
+    let defaultAction = 'toggle';
+    if (this.input.type === 'SW') {
+      defaultAction = this.input.events[eventIndex].event === 'on' ? 'on' : 'off';
+    }
 
     actions.push({
       outputID: null,
-      action: 'toggle',
+      action: defaultAction,
       duration: 0,
       slaveId: 0,
       output: 0,
       order: maxOrder + 1
     });
+
+    // Set the adding animation state
+    this.addingAction = { eventIndex, actionIndex: actions.length - 1 };
+    setTimeout(() => {
+      this.addingAction = null;
+    }, 300); // Match this with the CSS animation duration
   }
 
   onOutputChange(action: any): void {
     const selectedOutput = this.outputs.find(o => o.outputID === action.outputID);
     action.output = selectedOutput?.id || null;
+    action.slaveId = selectedOutput?.slaveId || 0;
   }
 
   removeAction(eventIndex: number, actionIndex: number): void {
-    // Удаление действия из события
-    this.input.events[eventIndex].actions.splice(actionIndex, 1);
+    this.deletingAction = { eventIndex, actionIndex };
+    setTimeout(() => {
+      this.input.events[eventIndex].actions.splice(actionIndex, 1);
+      this.deletingAction = null;
+    }, 300); // Match this with the CSS animation duration
+  }
+
+  isDeleting(eventIndex: number, actionIndex: number): boolean {
+    return this.deletingAction?.eventIndex === eventIndex && 
+           this.deletingAction?.actionIndex === actionIndex;
+  }
+
+  isAdding(eventIndex: number, actionIndex: number): boolean {
+    return this.addingAction?.eventIndex === eventIndex && 
+           this.addingAction?.actionIndex === actionIndex;
+  }
+
+  moveActionUp(eventIndex: number, actionIndex: number): void {
+    const actions = this.input.events[eventIndex].actions;
+    if (actionIndex > 0) {
+      this.swappingActions = { eventIndex, from: actionIndex, to: actionIndex - 1, direction: 'up' };
+      setTimeout(() => {
+        // Swap orders
+        const currentOrder = actions[actionIndex].order;
+        actions[actionIndex].order = actions[actionIndex - 1].order;
+        actions[actionIndex - 1].order = currentOrder;
+        // Swap positions in array
+        [actions[actionIndex], actions[actionIndex - 1]] = [actions[actionIndex - 1], actions[actionIndex]];
+        this.swappingActions = null;
+      }, 300); // 10x slower
+    }
+  }
+
+  moveActionDown(eventIndex: number, actionIndex: number): void {
+    const actions = this.input.events[eventIndex].actions;
+    if (actionIndex < actions.length - 1) {
+      this.swappingActions = { eventIndex, from: actionIndex, to: actionIndex + 1, direction: 'down' };
+      setTimeout(() => {
+        // Swap orders
+        const currentOrder = actions[actionIndex].order;
+        actions[actionIndex].order = actions[actionIndex + 1].order;
+        actions[actionIndex + 1].order = currentOrder;
+        // Swap positions in array
+        [actions[actionIndex], actions[actionIndex + 1]] = [actions[actionIndex + 1], actions[actionIndex]];
+        this.swappingActions = null;
+      }, 300); // 10x slower
+    }
+  }
+
+  getSwapDirection(eventIndex: number, actionIndex: number): string | null {
+    if (!this.swappingActions || this.swappingActions.eventIndex !== eventIndex) return null;
+    if (this.swappingActions.from === actionIndex) return this.swappingActions.direction;
+    if (this.swappingActions.to === actionIndex) return this.swappingActions.direction === 'up' ? 'down' : 'up';
+    return null;
+  }
+
+  isSwapping(eventIndex: number, actionIndex: number): boolean {
+    return !!(this.swappingActions && this.swappingActions.eventIndex === eventIndex &&
+      (this.swappingActions.from === actionIndex || this.swappingActions.to === actionIndex));
+  }
+
+  canMoveUp(eventIndex: number, actionIndex: number): boolean {
+    return actionIndex > 0;
+  }
+
+  canMoveDown(eventIndex: number, actionIndex: number): boolean {
+    return actionIndex < this.input.events[eventIndex].actions.length - 1;
   }
 
   save(): void {
-    console.log('Сохранение данных:', this.input);
-    // Сохранение данных через сервис
-    //this.input.mac = this.mac
-    this.toggleSubject.next( {payload: this.input });
-    //this.router.navigate(['/controller-details']); // Возврат на предыдущую страницу
+    console.log('Saving input:', this.input);
+    this.toggleSubject.next({ payload: this.input });
+    this.back();
   }
 
   back(): void {
-    this.router.navigate(['/controller-details']); // Возврат на предыдущую страницу
+    this.animationService.triggerLeaveAnimation();
+    setTimeout(() => {
+      if (this.controllerMac) {
+        this.router.navigate(['/controller', this.controllerMac]);
+      } else {
+        this.location.back();
+      }
+    }, 150); // Half the animation duration for smoother transition
   }
 }

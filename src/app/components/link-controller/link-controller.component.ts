@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {FormsModule} from "@angular/forms";
 import {WebsocketService} from "../../services/websocket.service";
 
@@ -14,23 +14,24 @@ import {WebsocketService} from "../../services/websocket.service";
 })
 export class LinkControllerComponent implements OnInit {
   constructor(private route: ActivatedRoute,
+              private router: Router,
               private websocketService: WebsocketService) {}
-  mac : any
+  mac: any
 
   ngOnInit() {
     this.mac = this.route.snapshot.paramMap.get('mac');
+    console.log('linkcontroller init', this.mac)
+  }
+
+  back() {
+    //window.history.back();
+    this.router.navigate(['/']);
   }
 
   link() {
-    console.log('link')
-    this.sendRequest()
-    // if (this.mac.length != 12) {
-    //
-    // }
-
+    console.log('link request for ', this.mac);
+    this.sendRequest();
   }
-
-
 
   sendRequest() {
     this.websocketService.sendMessage({

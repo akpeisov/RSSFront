@@ -1,60 +1,98 @@
-<div class="input-edit">
-  <button (click)="back()"><-</button>
-  <h2>Редактирование входа</h2>
-  <label>
-    Имя входа
-    <input type="text" [(ngModel)]="input.name" />
-  </label>
-  <label>
-    Тип входа
-    <select id="type" [(ngModel)]="input.type" class="form-control" (change)="updateEvents()">
-      <option value="BTN">Кнопка</option>
-      <option value="SW">Выключатель</option>
-      <option value="INVSW">Переключатель</option>
-    </select>
-  </label>
-
-  <h3>События</h3>
-
-  <div *ngFor="let event of input.events; let i = index">
-    <div class="event-card">
-      <h4>Event {{ event.event }}</h4>
-      <div *ngFor="let action of event.actions; let j = index">
-        <div class="action-card">
-          <label>Выход:</label>
-          <select [(ngModel)]="action.outputID"
-                  (ngModelChange)="onOutputChange(action)">
-            <option *ngFor="let output of outputs"
-                    [ngValue]="output.outputID">
-              {{ output.name }}
-            </option>
-          </select>
-
-          <label>Действие:</label>
-          <select [(ngModel)]="action.action">
-            <option value="on">Вкл</option>
-            <option value="off">Выкл</option>
-            <option value="toggle">Переключить</option>
-          </select>
-
-          <div *ngIf="action.action == 'on'">
-            <label>Длительность (сек):</label>
-            <input type="number" [(ngModel)]="action.duration" />
-          </div>
-          <button class="btn-remove" (click)="removeAction(i, j)">-</button>
-        </div>
-      </div>
-      <button class="btn-add" (click)="addAction(i)">+</button>
-    </div>
+<div class="input-edit-container">
+  <div class="header">
+    <button class="back-button" (click)="back()">
+      <img src="assets/icons/arrow-back.svg" width="24" height="24" alt="Back" />
+    </button>
+    <h2>Input Configuration</h2>
   </div>
 
+  <div class="input-edit-form">
+    <div class="basic-settings">
+      <div class="form-group">
+      <label for="name">Input Id {{input.id}}<span *ngIf="input.slaveId >0"> Slave Id {{input.slaveId}}</span></label>      
+      </div>
+      <div class="form-group">
+        <label for="name">Input Name</label>
+        <input id="name" type="text" [(ngModel)]="input.name" placeholder="Enter input name" />
+      </div>
 
-<!--  <button (click)="addEvent()">+</button>-->
-<!--  <div *ngFor="let event of input.events">-->
-<!--    <h4>{{ event.event }}</h4>-->
-<!--      <div *ngFor="let action of event.actions">-->
-<!--        <h4>{{ action.output }} {{ action.action }}</h4>-->
-<!--      </div>-->
-<!--  </div>-->
-  <button (click)="save()">Сохранить</button>
+      <div *ngIf="!input.isBtn" class="form-group">
+        <label for="type">Input Type</label>
+        <select id="type" [(ngModel)]="input.type" (change)="updateEvents()">
+          <option value="BTN">Button</option>
+          <option value="SW">Switch</option>
+          <option value="INVSW">Toggle Switch</option>
+        </select></div>
+    </div>
+
+    <h3>Events</h3>
+
+    <div class="events-container">
+      <div *ngFor="let event of input.events; let i = index" class="event-card">
+        <div class="event-header">
+          <h4>Event: {{ event.event }}</h4>
+        </div>
+
+        <div class="actions-container">
+          <div *ngFor="let action of event.actions; let j = index" 
+               class="action-card"
+               [class.deleting]="isDeleting(i, j)"
+               [class.adding]="isAdding(i, j)"
+               [class.swapping]="isSwapping(i, j)"
+               [class.swap-up]="getSwapDirection(i, j) === 'up'"
+               [class.swap-down]="getSwapDirection(i, j) === 'down'">
+            <div class="action-header">
+              <div class="action-controls-left">
+                <button class="order-button" 
+                        (click)="moveActionUp(i, j)" 
+                        [disabled]="!canMoveUp(i, j)"
+                        title="Move up">
+                  <img src="assets/icons/arrow-up.svg" width="16" height="16" alt="Up" />
+                </button>
+                <button class="order-button" 
+                        (click)="moveActionDown(i, j)" 
+                        [disabled]="!canMoveDown(i, j)"
+                        title="Move down">
+                  <img src="assets/icons/arrow-down.svg" width="16" height="16" alt="Down" />
+                </button>
+              </div>
+              <button class="remove-button" (click)="removeAction(i, j)" title="Remove action">
+                <img src="assets/icons/close.svg" width="20" height="20" alt="Remove" />
+              </button>
+            </div>
+            <div class="action-grid">
+              <div class="form-group">
+                <label>Output</label>
+                <select [(ngModel)]="action.outputUuid" (ngModelChange)="onOutputChange(action)">
+                  <option *ngFor="let output of outputs" [ngValue]="output.uuid">
+                    {{ output.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Action</label>
+                <select [(ngModel)]="action.action">
+                  <option value="on" *ngIf="input.type === 'SW'">On</option>
+                  <option value="off" *ngIf="input.type === 'SW'">Off</option>
+                  <option value="toggle" *ngIf="input.type === 'BTN' || input.type === 'INVSW'">Toggle</option>
+                  <option value="allOff">AllOff</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="add-button" (click)="addAction(i)">
+          <img src="assets/icons/plus.svg" width="20" height="20" alt="Add" />
+          Add Action
+        </button>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="cancel-button" (click)="back()">Back</button>
+      <button class="save-button" (click)="save()">Save</button>
+    </div>
+  </div>
 </div>

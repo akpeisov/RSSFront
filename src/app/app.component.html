@@ -1,1 +1,28 @@
-<router-outlet></router-outlet>
+<app-page-transition>
+  <div class="app-container">
+    <div class="app-header">
+      <div class="header-left">
+        <a routerLink="/" class="home-link">
+          <h1>RSS Front</h1>
+        </a>
+        <div *ngIf="environment.test" class="test-indicator">TEST</div>        
+      </div>
+      <div class="header-right">
+        <app-theme-toggle></app-theme-toggle>
+        <button class="add-controller-button" (click)="linkController()" title="Link controller" aria-label="Add controller">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <div class="user-info">
+          <button class="profile-button" (click)="navigateToAccount()">
+            <app-icon name="user"></app-icon>
+            <span class="username">{{ username }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <router-outlet></router-outlet>
+  </div>
+</app-page-transition>
