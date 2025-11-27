@@ -6,7 +6,9 @@
     <h2>Output configuration</h2>
   </div>
 
-  <div class="output-edit-form">
+  <div *ngIf="this.output == null">No output found</div>
+
+  <div *ngIf="this.output != null" class="output-edit-form">
     <div class="form-group">
       <label for="name">Output Id {{output.id}}
         <span *ngIf="output.slaveId != 0"> Slave Id {{output.slaveId}}</span></label>      

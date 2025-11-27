@@ -1,7 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {ActivatedRoute, Data, Router} from '@angular/router';
 import {FormsModule} from "@angular/forms";
-import {DataService} from "../../services/data.service";
 import {NgForOf, NgIf} from "@angular/common";
 import {debounceTime, Subject} from "rxjs";
 import {WebsocketService} from "../../services/websocket.service";
@@ -30,7 +29,6 @@ export class InputEditComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private dataService: DataService,
     private websocketService: WebsocketService,
     private location: Location,
     private animationService: AnimationService
@@ -46,16 +44,19 @@ export class InputEditComponent implements OnInit {
   ngOnInit(): void {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (uuid) {
-      this.dataService.getInputByUuid(uuid).subscribe((input) => {
-        this.input = input;
-        this.controllerMac = input.mac;
-        this.updateEvents();
-        //console.log('input-edit', this.input);                
-      });
-
-      this.dataService.getOutputsByInputUuid(uuid).subscribe((outputs) => {
-        this.outputs = outputs;
-        console.log('outputs', this.outputs);
+      this.websocketService.getUserDevices().subscribe((devices) => {
+        if (devices == null)
+          return;
+        // get input and outputs        
+        for (const device of devices) {          
+          if (device && device.io.inputs) {
+            this.input = device.io.inputs.find((input: any) => input.uuid === uuid);                       
+            if (this.input) {
+              this.outputs = device.io.outputs;              
+              break;
+            }
+          }
+        }      
       });
     }    
   }
@@ -197,8 +198,14 @@ export class InputEditComponent implements OnInit {
   back(): void {
     this.animationService.triggerLeaveAnimation();
     setTimeout(() => {
-      if (this.controllerMac) {
-        this.router.navigate(['/controller', this.controllerMac]);
+      const fromTab = (window.history && (window.history.state as any)?.fromTab) ? (window.history.state as any).fromTab : undefined;
+      const mac = this.controllerMac || (window.history && (window.history.state as any)?.controllerMac);
+      if (mac) {
+        if (fromTab) {          
+          this.router.navigate(['/controller', mac], { state: { activeTab: fromTab } });
+        } else {
+          this.router.navigate(['/controller', mac]);
+        }
       } else {
         this.location.back();
       }

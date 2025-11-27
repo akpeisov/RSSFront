@@ -62,7 +62,7 @@ export class OutputCardComponent implements OnDestroy {
 
   onEdit(): void {
     console.log(this.output.uuid);
-    this.router.navigate(['/output-edit', this.output.uuid]);
+    this.router.navigate(['/output-edit', this.output.uuid], { state: { fromTab: 'outputs', controllerMac: this.mac } });
   }
 
   ngOnDestroy(): void {

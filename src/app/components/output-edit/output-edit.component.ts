@@ -4,9 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AnimationService } from '../../services/animation.service';
 import { WebsocketService } from '../../services/websocket.service';
-import { debounceTime, Subject } from 'rxjs';
 import { Output } from '../../model/io-config';
-import { DataService } from '../../services/data.service';
 
 type NumberField = 'on' | 'off' | 'limit';
 
@@ -38,35 +36,31 @@ export class OutputEditComponent implements OnInit {
   ];
   formError: string = '';
   
-  private toggleSubject = new Subject<{ payload:any }>();
-  
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private location: Location,
     private animationService: AnimationService,
-    private websocketService: WebsocketService,
-    private dataService: DataService
+    private websocketService: WebsocketService
   ) {
-    this.toggleSubject.pipe(debounceTime(300)).subscribe(({ payload }) => {
-      this.websocketService.sendMessage({
-        type: 'UPDATEOUTPUT',
-        payload: payload,
-      });
-    });
   }
 
   public ngOnInit(): void {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     // Get output data from route state
     if (uuid) {
-      this.dataService.getOutputByUuid(uuid).subscribe((output: Output) => {
-        this.output = output;        
-        // console.log('output-edit', this.output);
+      this.websocketService.getUserDevices().subscribe((devices) => {
+        if (devices == null)
+          return;
+        //console.log('oe ', devices);
+        this.output = devices.reduce((acc: any, c: { io: { outputs: any[]; }; }) => {
+            if (acc) return acc;
+            return c?.io?.outputs?.find((o: any) => o.uuid === uuid) || null;
+          }, null as any);                  
       });
     }
   }
-  
+
   public onTypeChange(): void {
     // Reset timer-specific fields when type changes
     if (this.output.type !== 't') {
@@ -107,16 +101,24 @@ export class OutputEditComponent implements OnInit {
       return;
     }
 
-    console.log('Saving output:', this.output);
-    this.toggleSubject.next({ payload: this.output });    
+    this.websocketService.sendMessage({
+        type: 'UPDATEOUTPUT',
+        payload: this.output,
+      });
     this.back();
   }
 
   public back(): void {
     this.animationService.triggerLeaveAnimation();
     setTimeout(() => {
-      if (this.output.mac) {
-        this.router.navigate(['/controller', this.output.mac]);
+      const fromTab = (window.history && (window.history.state as any)?.fromTab) ? (window.history.state as any).fromTab : undefined;
+      const mac = this.output.mac || (window.history && (window.history.state as any)?.controllerMac);
+      if (mac) {
+        if (fromTab) {
+          this.router.navigate(['/controller', mac], { state: { activeTab: fromTab } });
+        } else {
+          this.router.navigate(['/controller', mac]);
+        }
       } else {
         this.location.back();
       }

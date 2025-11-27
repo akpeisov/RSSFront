@@ -82,6 +82,7 @@ export class ButtonCardComponent {
     this.input.isBtn = true;
     console.log('bcard', this.mac);
     console.log(this.input);
-    this.router.navigate(['/input-edit', this.input.uuid]);
+    //this.router.navigate(['/input-edit', this.input.uuid]);
+    this.router.navigate(['/input-edit', this.input.uuid], { state: { fromTab: 'buttons', controllerMac: this.mac } });
   }
 }

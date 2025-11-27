@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
-import {DataService} from "../../services/data.service";
 import {OutputCardComponent} from "../output-card/output-card.component";
 import {InputCardComponent} from "../input-card/input-card.component";
 import {NgFor, NgClass, NgIf, KeyValuePipe, DatePipe} from "@angular/common";
@@ -11,6 +10,7 @@ import {WebsocketService} from "../../services/websocket.service";
 import {filter} from "rxjs/operators";
 import { AnsiColorPipe } from '../shared/ansi-color/ansi-color.pipe';
 import { RouterModule } from '@angular/router';
+import { IUpdateIOMsg } from '../../model/update-io-msg';
 
 @Component({
   selector: 'app-controller-details',
@@ -51,7 +51,6 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
 
   constructor(private route: ActivatedRoute,
               private router: Router,
-              private dataService: DataService,
               private websocketService: WebsocketService) {
     this.toggleSubject.pipe(debounceTime(300)).subscribe((command) => {
       if (this.controller?.mac) {
@@ -146,31 +145,41 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
     return grouped;
   }
 
-  ngOnInit() {
+  ngOnInit() {    
     const mac = this.route.snapshot.paramMap.get('mac');
+    // Restore active tab if navigation state provided (e.g., returning from edit)
+    const navState: any = (window && (window.history && (window.history.state))) || {};
+    if (navState && navState.activeTab) {
+      this.activeTab = navState.activeTab;
+      this.previousTab = navState.activeTab;
+    }
     if (mac) {
       this.loadController(mac);
+      this.setupWebSocketSubscription();
       this.navigationSubscription = this.router.events.subscribe(event => {
         if (event instanceof NavigationEnd) {
           this.loadController(mac);
         }
       });
-    }
+    }    
   }
 
   private loadController(mac: string) {
-    this.dataService.getControllerByMacWithFetch(mac).subscribe((controller) => {
-      this.controller = controller;
-      this.buildOutputsBySlaveId();
-      if (this.controller?.io.outputs) {
-        this.controller.io.outputs.sort((a: any, b: any) => {
-          if (a.slaveId !== b.slaveId) {
-            return a.slaveId - b.slaveId;
+    this.websocketService.getUserDevices().subscribe((devices) => {
+      if (devices != null) {
+        this.controller = devices.find((ctrl: { mac: string; }) => ctrl.mac === mac);        
+        if (this.controller) {
+          this.buildOutputsBySlaveId();
+          if (this.controller?.io.outputs) {
+            this.controller.io.outputs.sort((a: any, b: any) => {
+              if (a.slaveId !== b.slaveId) {
+                return a.slaveId - b.slaveId;
+              }
+              return a.id - b.id;
+            });
           }
-          return a.id - b.id;
-        });
+        }
       }
-      this.setupWebSocketSubscription();
     });
   }
 
@@ -179,6 +188,16 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
     if (this.websocketSubscription) {
       this.websocketSubscription.unsubscribe();
     }
+
+    this.websocketService.updateIO$.subscribe((update) => {
+      console.log('cd update', update);
+      if (this.controller == null || update == null)
+        return;
+      if (update.mac === this.controller.mac) {
+        // io state changed
+        this.updateControllerIO(update);
+      }
+    })
 
     // Subscribe to WebSocket messages to update controller info
     this.websocketSubscription = this.websocketService.messages$.pipe(
@@ -215,7 +234,49 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
+  private updateControllerIO(data: IUpdateIOMsg | any): void {
+    // If bulk arrays provided
+    if (Array.isArray(data.outputs)) {
+      // Update outputs
+      if (Array.isArray(data.outputs) && this.controller.io && Array.isArray(this.controller.io.outputs)) {
+        data.outputs.forEach((out: any) => {
+          const o = this.controller.io.outputs.find((outputItem: any) => outputItem.id === out.id && (outputItem.slaveId ?? 0) === (out.slaveId ?? 0));
+          if (o) {
+            o.state = out.state;
+            //if (out.timer !== undefined) 
+            o.timer = out.timer;
+          }
+        });
+      }
+    }
+
+    if (Array.isArray(data.inputs)) {
+      // Update inputs
+      if (Array.isArray(data.inputs) && this.controller.io && Array.isArray(this.controller.io.inputs)) {
+        data.inputs.forEach((inp: any) => {
+          const i = this.controller.io.inputs.find((inputItem: any) => inputItem.id === inp.id && (inputItem.slaveId ?? 0) === (inp.slaveId ?? 0));
+          if (i) {
+            i.state = inp.state;
+          } 
+        });
+      }
+    } else {
+      // Backwards-compatible single update
+      const output = this.controller.io.outputs.find((outputItem: any) => outputItem.id === data.output && (outputItem.slaveId ?? 0) === (data.slaveId ?? 0));
+      const input = this.controller.io.inputs.find((inputItem: any) => inputItem.id === data.input && (inputItem.slaveId ?? 0) === (data.slaveId ?? 0));
+      if (output) {
+        output.state = data.state;
+        if (data.timer !== undefined) output.timer = data.timer;
+      } else if (input) {
+        input.state = data.state;
+      } else {
+        console.log(`Output or input not found: MAC=${data.mac}, Output=${data.output}, Input=${data.input}, SlaveId=${data.slaveId}`);
+      }
+    }
+  }
+
   ngOnDestroy() {
+    console.log('cd destroy');
     if (this.websocketSubscription) {
       this.websocketSubscription.unsubscribe();
     }
@@ -238,13 +299,7 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
     this.showInfoPopup = true;
     this.toggleSubject.next('INFO');
   }
-/*
-  onEditOutput(output: any) {
-    this.router.navigate(['/output-edit'], { 
-      state: { output } 
-    });
-  }
-*/
+
   showService() {
     this.showServicePopup = true;    
   }

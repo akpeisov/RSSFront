@@ -3,7 +3,6 @@ import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule, Location } from '@angular/common';
-import { DataService } from '../../services/data.service';
 import { RouterModule } from '@angular/router';
 import { ControllerConfig } from '../../model/controller-config';
 import { WebsocketService } from '../../services/websocket.service';
@@ -17,77 +16,87 @@ import { AnimationService } from '../../services/animation.service';
   styleUrl: './settings.component.scss'
 })
 export class SettingsComponent implements OnInit {
-  availableMaster: any[] = [];
+  availableMasters: any[] = [];
   formError: string = '';
   mac: string = '';
-  config: ControllerConfig | null = null;
+  config: ControllerConfig | null = null;  
   hwParamsEntries: Array<{ key: string; value: string }> = [];
 
-  constructor(private dataService: DataService, 
-              private route: ActivatedRoute,
+  constructor(private route: ActivatedRoute,
               private router: Router,
               private location: Location,
               private animationService: AnimationService,
               private websocketService: WebsocketService) {}
 
   ngOnInit() {
-    this.mac = this.route.snapshot.paramMap.get('mac') || '';
-    //this.availableMaster = (this.dataService.controllers || []).filter((ctrl: any) => ctrl.modbus?.mode !== 'slave');
-    this.dataService.getControllerByMacWithFetch(this.mac).subscribe((config) => {
-      console.log('Fetched', config)
-      // Корректная инициализация config и всех вложенных объектов
-      const emptyConfig: ControllerConfig = {
-        mac: this.mac,
-        name: '',
-        description: '',
-        hwParams: '',
-        modbus: {
-          mode: 'none',          
-          pollingTime: 100,
-          readTimeout: 200,
-          maxRetries: 3,
-          actionOnSameSlave: false
-        },
-        network: {
-          mac: this.mac,
-          ntpServer: 'pool.ntp.org',
-          ntpTZ: 'UTC-5:00',
-          otaURL: 'https://api.akpeisov.kz/RelayController.bin',
-          cloud: { address: 'wss://api.akpeisov.kz/ws', enabled: false },
-          eth: { enabled: false, dhcp: true, ip: '', netmask: '', gateway: '', dns: '', enableReset: false, resetGPIO: 0 },
-          wifi: { enabled: false, dhcp: true, ip: '', netmask: '', gateway: '', ssid: '', pass: '', dns: '' },
-          ftp: { enabled: false, user: 'admin', pass: 'admin' }
-        },
-        scheduler: { enabled: false, tasks: [] },
-        io: { outputs: [], inputs: [] }
-      };
-      // Если config не пришёл, используем пустой
-      if (!config) {
-        this.config = emptyConfig;
-      } else {
-        // Если config пришёл, дополняем недостающие объекты
-        this.config = {
-          mac: config.mac ?? this.mac,
-          name: config.name,
-          hwParams: config.hwParams,
-          description: config.description,
-          modbus: { ...emptyConfig.modbus, ...(config.modbus ?? {}) },
-          network: {
-            ...emptyConfig.network,
-            ...(config.network ?? {}),
-            cloud: { ...emptyConfig.network.cloud, ...(config.network?.cloud ?? {}) },
-            eth: { ...emptyConfig.network.eth, ...(config.network?.eth ?? {}) },
-            wifi: { ...emptyConfig.network.wifi, ...(config.network?.wifi ?? {}) },
-            ftp: { ...emptyConfig.network.ftp, ...(config.network?.ftp ?? {}) }
-          },
-          scheduler: { ...emptyConfig.scheduler, ...(config.scheduler ?? {}) },
-          io: { ...emptyConfig.io, ...(config.io ?? {}) }
-        };
+    this.mac = this.route.snapshot.paramMap.get('mac') || '';    
+    this.websocketService.getUserDevices().subscribe((devices) => {
+      if (devices != null) {
+        this.config = devices.find((ctrl: { mac: string; }) => ctrl.mac === this.mac);        
+        // Получаем список контроллеров, кроме текущего
+        this.availableMasters = devices.filter((ctrl: any) => ctrl.mac !== this.config?.mac && ctrl.modbus?.mode != 'slave');        
+        this.initModbusConfig();
+        // parse hwParams into entries for the form
+        this.parseHwParams();
       }
-      this.initModbusConfig();
-      // parse hwParams into entries for the form
-      this.parseHwParams();
     });
+    
+    
+    // this.dataService.getControllerByMacWithFetch(this.mac).subscribe((config) => {
+    //   console.log('Fetched', config)
+    //   // Корректная инициализация config и всех вложенных объектов
+    //   const emptyConfig: ControllerConfig = {
+    //     mac: this.mac,
+    //     name: '',
+    //     description: '',
+    //     hwParams: '',
+    //     modbus: {
+    //       mode: 'none',          
+    //       pollingTime: 100,
+    //       readTimeout: 200,
+    //       maxRetries: 3,
+    //       actionOnSameSlave: false
+    //     },
+    //     network: {
+    //       mac: this.mac,
+    //       ntpServer: 'pool.ntp.org',
+    //       ntpTZ: 'UTC-5:00',
+    //       otaURL: 'https://api.akpeisov.kz/RelayController.bin',
+    //       cloud: { address: 'wss://api.akpeisov.kz/ws', enabled: false },
+    //       eth: { enabled: false, dhcp: true, ip: '', netmask: '', gateway: '', dns: '', enableReset: false, resetGPIO: 0 },
+    //       wifi: { enabled: false, dhcp: true, ip: '', netmask: '', gateway: '', ssid: '', pass: '', dns: '' },
+    //       ftp: { enabled: false, user: 'admin', pass: 'admin' }
+    //     },
+    //     scheduler: { enabled: false, tasks: [] },
+    //     io: { outputs: [], inputs: [] }
+    //   };
+    //   // Если config не пришёл, используем пустой
+    //   if (!config) {
+    //     this.config = emptyConfig;
+    //   } else {
+    //     // Если config пришёл, дополняем недостающие объекты
+    //     this.config = {
+    //       mac: config.mac ?? this.mac,
+    //       name: config.name,
+    //       hwParams: config.hwParams,
+    //       description: config.description,
+    //       modbus: { ...emptyConfig.modbus, ...(config.modbus ?? {}) },
+    //       network: {
+    //         ...emptyConfig.network,
+    //         ...(config.network ?? {}),
+    //         cloud: { ...emptyConfig.network.cloud, ...(config.network?.cloud ?? {}) },
+    //         eth: { ...emptyConfig.network.eth, ...(config.network?.eth ?? {}) },
+    //         wifi: { ...emptyConfig.network.wifi, ...(config.network?.wifi ?? {}) },
+    //         ftp: { ...emptyConfig.network.ftp, ...(config.network?.ftp ?? {}) }
+    //       },
+    //       scheduler: { ...emptyConfig.scheduler, ...(config.scheduler ?? {}) },
+    //       io: { ...emptyConfig.io, ...(config.io ?? {}) }
+    //     };
+    //   }
+    //   this.initModbusConfig();
+    //   // parse hwParams into entries for the form
+    //   this.parseHwParams();
+    // });
   }
 
   private parseHwParams() {
@@ -178,8 +187,6 @@ export class SettingsComponent implements OnInit {
       console.log('Config is null');
       return;
     }
-    // Получаем список контроллеров, кроме текущего
-    this.availableMaster = (this.dataService.controllers || []).filter((ctrl: any) => ctrl.mac !== this.config?.mac && ctrl.modbus?.mode != 'slave');
     // Копируем текущую конфигурацию modbus или создаем дефолтную    
     if (this.config.modbus == null || this.config.modbus.mode == null) {
       this.config.modbus.mode = 'none';
@@ -310,6 +317,7 @@ export class SettingsComponent implements OnInit {
       type: 'DEVICECONFIG',
       payload: this.config      
     });    
+    this.back();
   }
 
   public back(): void {

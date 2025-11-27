@@ -114,14 +114,14 @@
            'slide-left': getTabAnimationClass('outputs') === 'slide-left'
          }">
       <div class="outputs-container">
-        <ng-container *ngFor="let slaveGroup of getOutputsBySlaveId() | keyvalue; trackBy: trackByOutput">
+        <ng-container *ngFor="let slaveGroup of getOutputsBySlaveId() | keyvalue; trackBy: trackByGroupKey">
           <div class="slave-divider" *ngIf="slaveGroup.key !== '0'">
             <span class="slave-label">Slave ID: {{ slaveGroup.key }}</span>
           </div>
-          <app-output-card *ngFor="let output of slaveGroup.value" 
+          <app-output-card *ngFor="let output of slaveGroup.value; trackBy: trackByOutput" 
                            [output]="output" 
-                           [mac]="controller?.mac">
-                           <!-- (edit)="onEditOutput($event)" -->
+                           [ngClass]="output.state"
+                           [mac]="controller?.mac">                           
           </app-output-card>
         </ng-container>
       </div>

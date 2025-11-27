@@ -6,7 +6,9 @@
     <h2>Input Configuration</h2>
   </div>
 
-  <div class="input-edit-form">
+  <div *ngIf="this.input == null">No input found</div>
+
+  <div *ngIf="this.input != null" class="input-edit-form">
     <div class="basic-settings">
       <div class="form-group">
       <label for="name">Input Id {{input.id}}<span *ngIf="input.slaveId >0"> Slave Id {{input.slaveId}}</span></label>      

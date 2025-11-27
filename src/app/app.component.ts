@@ -4,7 +4,6 @@ import { RouterOutlet, Router, NavigationEnd, RouterModule } from '@angular/rout
 import { filter } from 'rxjs/operators';
 import { WebsocketService } from "./services/websocket.service";
 import { KeycloakService } from "keycloak-angular";
-import { DataService } from "./services/data.service";
 import { ToastrService } from "ngx-toastr";
 import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.component';
 import { IconComponent } from './components/shared/icon/icon.component';
@@ -39,7 +38,6 @@ export class AppComponent implements OnInit {
   constructor(
     private websocketService: WebsocketService,
     private keycloakService: KeycloakService,
-    private dataService: DataService,
     private toastr: ToastrService,
     private router: Router,
     private location: Location,
@@ -74,7 +72,6 @@ export class AppComponent implements OnInit {
         msg => {
           // console.log('WebSocket message received:', msg);
           this.wsMgs = msg;
-          this.dataService.updateData(msg);
           this.processMessage(msg);
         },
         error => {
@@ -119,8 +116,13 @@ export class AppComponent implements OnInit {
     //this.wsMgs = message;
     const payload = message.payload;
     if (message.type === 'UPDATE') {
-      this.dataService.updateControllerIO(payload);
-      this.updateControllerDetails(payload.mac);
+      // this.dataService.updateControllerIO(payload);
+      // this.updateControllerDetails(payload.mac);
+    } else if (message.type === 'AUTHORIZED') {
+      this.websocketService.getUserDevices();
+    } else if (message.type === 'USERDEVICES') {      
+      //this.websocketService.setControllers(payload);
+      //this.dataService.setControllers(payload); // temp
     } else if (message.type === 'SUCCESS') {
       this.toastr.success(payload.message);
     } else if (message.type === 'ERROR') {

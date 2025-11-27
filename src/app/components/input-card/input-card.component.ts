@@ -13,6 +13,6 @@ export class InputCardComponent {
   constructor(private router: Router) {}
 
   onEdit(): void {
-    this.router.navigate(['/input-edit', this.input.uuid]);
+    this.router.navigate(['/input-edit', this.input.uuid], { state: { fromTab: 'inputs', controllerMac: this.mac } });
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, ReplaySubject, Subscription, EMPTY } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { ToastrService } from 'ngx-toastr';
 import { ErrorService } from './error.service';
@@ -16,11 +16,15 @@ export class WebsocketService implements OnDestroy {
   private ws: WebSocketSubject<any> | null = null;
   private isConnecting = false;
   private connectionStatusSubject = new BehaviorSubject<boolean>(false);
+  private userDevicesSubject = new BehaviorSubject<any>(null);
+  private updateIO = new BehaviorSubject<any>(null);
   public readonly isConnected$: Observable<boolean> = this.connectionStatusSubject.asObservable();
+  private readonly userDevices$: Observable<any> = this.userDevicesSubject.asObservable();
+  public readonly updateIO$: Observable<any> = this.updateIO.asObservable();
   private inboundSubject = new ReplaySubject<any>();
   public readonly messages$: Observable<any> = this.inboundSubject.asObservable();
   private wsSubscription: Subscription | null = null;
-
+  
   private myHello: IHelloMsg = {
     type: 'HELLO',
     payload: {
@@ -90,7 +94,14 @@ export class WebsocketService implements OnDestroy {
     // subscribe to messages and forward to inboundSubject
     try {
       this.wsSubscription = this.ws.pipe(
-        tap(msg => console.log('WS raw message', msg)),
+        tap(msg => {
+          console.log('WS raw message', msg)
+          if (msg.type === 'USERDEVICES') {
+            this.userDevicesSubject.next(msg.payload);            
+          } else if (msg.type === 'UPDATE') {
+            this.updateIO.next(msg.payload);                 
+          }
+        }),        
         catchError((err) => {
           //console.error('WebSocket stream error', err);
           this.errorService.handle('WebSocket stream error');
@@ -135,11 +146,16 @@ export class WebsocketService implements OnDestroy {
         this.toastr.error('Unable to send WebSocket message', 'WebSocket');
       }
     } else {
-      console.error('WebSocket is not connected');
-      this.toastr.error('Unable to send message: WebSocket is not connected', 'WebSocket');
+      // console.error('WebSocket is not connected');
+      // this.toastr.error('Unable to send message: WebSocket is not connected', 'WebSocket');
     }
   }
 
+  public getUserDevices(): Observable<any> {        
+    this.sendMessage({ type: 'USERDEVICES' });
+    return this.userDevicesSubject.asObservable();    
+  }
+  
   public closeConnection(): void {
     if (this.wsSubscription) {
       try { this.wsSubscription.unsubscribe(); } catch {}

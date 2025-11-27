@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import {DataService} from "../../services/data.service";
 import {Router} from "@angular/router";
 import { WebsocketService } from '../../services/websocket.service';
 import { filter, Subscription } from 'rxjs';
@@ -25,23 +24,35 @@ export class ControllerListComponent implements OnInit, OnDestroy {
   private connSub: Subscription | null = null;
   private msgSub: Subscription | null = null;
   
-  constructor(private dataService: DataService,
-              private router: Router,
+  constructor(private router: Router,
               private websocketService: WebsocketService) {}
 
   ngOnInit() {    
     // Subscribe to websocket connection status
     this.connSub = this.websocketService.isConnected$.subscribe((status: boolean) => {
-      this.isOnline = status;
-      if (status == true) {
-        this.getUserDevices();
-      }
+      this.isOnline = status;      
+    });
+
+    this.websocketService.getUserDevices().subscribe((data: any) => {
+      if (data != null) {        
+        this.controllers = data;
+        //console.log('data list', this.controllers)
+        // maintain a separately sorted view to avoid sorting in template
+        this.sortedControllers = [...this.controllers].sort((a: any, b: any) => {
+          const an = (a && a.name) ? String(a.name) : '';
+          const bn = (b && b.name) ? String(b.name) : '';
+          return an.localeCompare(bn);
+        });
+        //console.log(this.sortedControllers);
+      } 
     });
 
     // Subscribe to WebSocket messages to update controller status
     this.msgSub = this.websocketService.messages$.pipe(
       filter((message: any) => message && message.type === 'STATUS')
     ).subscribe((message: any) => {
+      // STATUS прилетает по одному контроллеру (online/offline)
+      
       const mac = message?.payload?.mac;
       const status = message?.payload?.status;
       if (!mac) return;
@@ -59,20 +70,7 @@ export class ControllerListComponent implements OnInit, OnDestroy {
       }
     });      
   }
-
-  getUserDevices() {
-    this.dataService.getUserDevices().subscribe((data) => {
-      this.controllers = data || [];
-      // maintain a separately sorted view to avoid sorting in template
-      this.sortedControllers = [...this.controllers].sort((a: any, b: any) => {
-        const an = (a && a.name) ? String(a.name) : '';
-        const bn = (b && b.name) ? String(b.name) : '';
-        return an.localeCompare(bn);
-      });
-      //console.log(this.controllers);
-    });
-  }
-
+  
   ngOnDestroy() {
     if (this.connSub) this.connSub.unsubscribe();
     if (this.msgSub) this.msgSub.unsubscribe();

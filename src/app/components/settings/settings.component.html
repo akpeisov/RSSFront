@@ -196,7 +196,7 @@
               </label>
               <label>Master
                 <select [(ngModel)]="config.modbus.master">
-                  <option *ngFor="let ctrl of availableMaster" [value]="ctrl.mac">{{ ctrl.name }}</option>
+                  <option *ngFor="let ctrl of availableMasters" [value]="ctrl.mac">{{ ctrl.name }}</option>
                 </select>
               </label>
             </div>	            
