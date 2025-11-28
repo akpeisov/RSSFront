@@ -1,7 +1,6 @@
 export const environment = {
-  production: false,
+  production: true,
   test: false,
-  apiUrl: 'https://api.akpeisov.kz',
   wsUrl: 'wss://api.akpeisov.kz/ws',
   keycloak: {
     url: 'https://keycloak.akpeisov.kz',

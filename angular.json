@@ -52,6 +52,15 @@
               "outputHashing": "all",
               "serviceWorker": "ngsw-config.json"
             },
+            "test": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.test.ts"
+                }
+              ],
+              "sourceMap": true
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,
@@ -82,6 +91,9 @@
           "configurations": {
             "production": {
               "buildTarget": "RSSFront:build:production"
+            },
+            "test": {
+              "buildTarget": "RSSFront:build:test"
             },
             "development": {
               "buildTarget": "RSSFront:build:development"
