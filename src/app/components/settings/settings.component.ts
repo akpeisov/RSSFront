@@ -132,7 +132,7 @@ export class SettingsComponent implements OnInit {
       obj[e.key] = this.parseHwParamValue(e.value);
     }
     try {
-      this.config.hwParams = JSON.stringify(obj);
+      this.config.hwParams = obj; //JSON.stringify(obj);
     } catch (e) {
       console.warn('Failed to serialize hwParams', e);
       this.config.hwParams = '';

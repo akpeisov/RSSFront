@@ -92,9 +92,13 @@ export class OutputEditComponent implements OnInit {
     }
   }
 
-  public save(): void {
+  public save(): void {    
     this.formError = '';
     
+    if (this.output.name == null || this.output.name.trim() === '') {
+      this.formError = 'Name must be provided';
+      return;
+    }
     // Validate room name when Alice is enabled
     if (this.output.alice && (!this.output.room || this.output.room.trim() === '')) {
       this.formError = 'Room name is required when Alice is enabled';
