@@ -46,6 +46,7 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   showDeleteConfirm = false;
   private toggleSubject = new Subject<any>();
   private websocketSubscription: Subscription | null = null;
+  private websocketSubscription2: Subscription | null = null;
   public formError: string = '';
   outputsBySlaveGroups: { [key: string]: any[] } = {};
 
@@ -188,16 +189,18 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
     if (this.websocketSubscription) {
       this.websocketSubscription.unsubscribe();
     }
+    if (this.websocketSubscription2) {
+      this.websocketSubscription2.unsubscribe();
+    }
 
-    this.websocketService.updateIO$.subscribe((update) => {
-      console.log('cd update', update);
+    this.websocketSubscription2 = this.websocketService.updateIO$.subscribe((update) => {
       if (this.controller == null || update == null)
         return;
       if (update.mac === this.controller.mac) {
         // io state changed
         this.updateControllerIO(update);
       }
-    })
+    });
 
     // Subscribe to WebSocket messages to update controller info
     this.websocketSubscription = this.websocketService.messages$.pipe(
@@ -206,14 +209,16 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
         (message.type === 'LOG') || (message.type === 'SUCCESS') || (message.type === 'STATUS')
       )
     ).subscribe((message: any) => {
-      console.log('Controller-details ', message);
+      //console.log('Controller-details ', message);
+      if (message.type !== 'STATUS')
+        this.controller.status = "online";
       if (message.type === 'INFO' && this.controller && message.payload) {
         // Update controller info with new data
         this.controller = {
           ...this.controller,
           ...message.payload
         };
-        console.log('Controller info updated:', message.payload);
+        //console.log('Controller info updated:', message.payload);
       } else if (message.type === 'LOG' && message.payload) {
         const newLines = Array.isArray(message.payload)
           ? "test"//message.payload
@@ -276,7 +281,6 @@ export class ControllerDetailsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    console.log('cd destroy');
     if (this.websocketSubscription) {
       this.websocketSubscription.unsubscribe();
     }

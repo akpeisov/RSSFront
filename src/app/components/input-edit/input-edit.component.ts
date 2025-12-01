@@ -63,7 +63,7 @@ export class InputEditComponent implements OnInit {
 
   updateEvents(): void {
     // Для INVSW: только toggle
-    console.log( 'type', this.input);
+    //console.log( 'type', this.input);
     if (this.input.type === 'INVSW') {
       const toggleActions = this.input.events?.find((e: { event: string }) => e.event === 'toggle')?.actions || [];
       this.input.events = [{ event: 'toggle', actions: toggleActions }];
