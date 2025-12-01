@@ -19,7 +19,7 @@ export class WebsocketService implements OnDestroy {
   private userDevicesSubject = new BehaviorSubject<any>(null);
   private updateIO = new BehaviorSubject<any>(null);
   public readonly isConnected$: Observable<boolean> = this.connectionStatusSubject.asObservable();
-  private readonly userDevices$: Observable<any> = this.userDevicesSubject.asObservable();
+  //private readonly userDevices$: Observable<any> = this.userDevicesSubject.asObservable();
   public readonly updateIO$: Observable<any> = this.updateIO.asObservable();
   private inboundSubject = new ReplaySubject<any>();
   public readonly messages$: Observable<any> = this.inboundSubject.asObservable();

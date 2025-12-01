@@ -22,8 +22,7 @@ export class InputEditComponent implements OnInit {
   deletingAction: { eventIndex: number, actionIndex: number } | null = null;
   addingAction: { eventIndex: number, actionIndex: number } | null = null;
   swappingActions: { eventIndex: number, from: number, to: number, direction: 'up' | 'down' } | null = null;
-  isBtn: boolean = false;
-
+  formError: string = '';
   private toggleSubject = new Subject<{ payload:any }>();
 
   constructor(
@@ -50,9 +49,10 @@ export class InputEditComponent implements OnInit {
         // get input and outputs        
         for (const device of devices) {          
           if (device && device.io.inputs) {
-            this.input = device.io.inputs.find((input: any) => input.uuid === uuid);                       
+            this.input = device.io.inputs.find((input: any) => input.uuid === uuid);                                   
             if (this.input) {
               this.outputs = device.io.outputs;              
+              this.updateEvents();
               break;
             }
           }
@@ -63,6 +63,7 @@ export class InputEditComponent implements OnInit {
 
   updateEvents(): void {
     // Для INVSW: только toggle
+    console.log( 'type', this.input);
     if (this.input.type === 'INVSW') {
       const toggleActions = this.input.events?.find((e: { event: string }) => e.event === 'toggle')?.actions || [];
       this.input.events = [{ event: 'toggle', actions: toggleActions }];
@@ -189,7 +190,16 @@ export class InputEditComponent implements OnInit {
     return actionIndex < this.input.events[eventIndex].actions.length - 1;
   }
 
+  isBtn(): boolean {    
+    return this.input.id > 15
+  }
+
   save(): void {
+    this.formError = '';
+    if (this.input.name == null) {
+      this.formError = 'Name must be provided';
+      return;
+    }
     console.log('Saving input:', this.input);
     this.toggleSubject.next({ payload: this.input });
     this.back();

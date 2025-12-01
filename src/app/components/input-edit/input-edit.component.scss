@@ -389,6 +389,12 @@
   min-width: 0;
 }
 
+.error-message {
+	color: var(--error-color, #f44336);
+	font-size: 0.95rem;
+	margin-top: 4px;
+}
+
 // Responsive adjustments
 @media (max-width: 767px) {
   .input-edit-container {

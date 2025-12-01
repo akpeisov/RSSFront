@@ -18,7 +18,7 @@
         <input id="name" type="text" [(ngModel)]="input.name" placeholder="Enter input name" />
       </div>
 
-      <div *ngIf="!input.isBtn" class="form-group">
+      <div *ngIf="!isBtn()" class="form-group">
         <label for="type">Input Type</label>
         <select id="type" [(ngModel)]="input.type" (change)="updateEvents()">
           <option value="BTN">Button</option>
@@ -91,6 +91,8 @@
         </button>
       </div>
     </div>
+
+    <div class="error-message" *ngIf="formError">{{ formError }}</div>    
 
     <div class="form-actions">
       <button class="cancel-button" (click)="back()">Back</button>
